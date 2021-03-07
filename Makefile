@@ -14,12 +14,11 @@ $(TARGET): $(OBJS)
 	$(shell nasm -f elf boot.asm -o boot.o)
 	$(CC) -m32 -nostdlib -nodefaultlibs -lgcc boot.o $? -T linker.ld -o $(TARGET)
 
-
 finale:
-    $(shell cd ~/clang/mars-os/)
-    $(shell cp $(TARGET) ./iso/boot/$(TARGET))
-    $(shell grub-mkrescue iso --output=$(TARGET).iso)
+	$(shell cd ~/clang/mars-os/)
+	$(shell cp $(TARGET) ./iso/boot/$(TARGET))
+	$(shell grub-mkrescue iso --output=$(TARGET).iso)
 
 clean:
-    $(shell rm -f *.o $(TARGET) $(TARGET).iso)
-    $(shell find . -name \*.o | xargs --no-run-if-empty rm)
+	$(shell rm -f *.o $(TARGET) $(TARGET).iso)
+	$(shell find . -name \*.o | xargs --no-run-if-empty rm)

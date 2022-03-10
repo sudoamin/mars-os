@@ -8,7 +8,7 @@ void init(void) {
 }
 
 int main(void) {
-    const char *str = "Hello world";
+    const char *str = "Starting";
     unsigned int i = 0;
     unsigned int j = 0;
 

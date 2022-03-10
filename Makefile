@@ -24,10 +24,10 @@ run:
 
 clean:
 	rm src/kernel/kernel.o
-	rm iso/boot/mars
 	rm boot.o
 	rm mars.iso
 	rm src/libc/string/string.o
 	rm idt.asm.o
 	rm src/idt/idt.o
 	rm src/memory/memory.o
+	rm src/terminal/terminal.o

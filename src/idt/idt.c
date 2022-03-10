@@ -1,6 +1,6 @@
 #include "idt.h"
 
-#include "../kernel/kernel.h"
+#include "../terminal/terminal.h"
 #include "../memory/memory.h"
 
 struct idt_desc idt_descriptors[TOTAL_INTERRUPTS];

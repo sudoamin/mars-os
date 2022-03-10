@@ -12,17 +12,22 @@ all: iso run clean
 
 $(TARGET): $(OBJS)
 	$(shell nasm -f elf src/boot/boot.asm -o boot.o)
-	$(CC) -m32 -nostdlib -nodefaultlibs -lgcc boot.o $? -T src/linker.ld -o $(TARGET)
+	$(shell nasm -f elf src/idt/idt.asm -o idt.asm.o)
+	$(CC) -m32 -nostdlib -nodefaultlibs -lgcc boot.o idt.asm.o $? -T src/linker.ld -o $(TARGET)
 	mv mars iso/boot
 
 iso:
 	$(shell grub-mkrescue iso --output=$(TARGET).iso)
 
 run:
-	qemu-system-x86_64 -cdrom mars.iso
+	qemu-system-x86_64 -cdrom $(TARGET).iso
 
 clean:
 	rm src/kernel/kernel.o
 	rm iso/boot/mars
 	rm boot.o
 	rm mars.iso
+	rm src/libc/string/string.o
+	rm idt.asm.o
+	rm src/idt/idt.o
+	rm src/memory/memory.o

@@ -11,9 +11,9 @@ all: iso run clean
 	$(CC) -c $(@:.o=.c) -o $@ -ffreestanding -fno-exceptions -m32
 
 $(TARGET): $(OBJS)
-	$(shell nasm -f elf src/boot/boot.asm -o boot.o)
-	$(shell nasm -f elf src/idt/idt.asm -o idt.asm.o)
-	$(CC) -m32 -nostdlib -nodefaultlibs -lgcc boot.o idt.asm.o $? -T src/linker.ld -o $(TARGET)
+	$(shell nasm -f elf src/boot/loader.asm -o loader.s.o)
+	$(shell nasm -f elf src/idt/idt.asm -o idt.s.o)
+	$(CC) -m32 -nostdlib -nodefaultlibs -lgcc loader.s.o idt.s.o $? -T src/linker.ld -o $(TARGET)
 	mv mars iso/boot
 
 iso:
@@ -23,11 +23,5 @@ run:
 	qemu-system-x86_64 -cdrom $(TARGET).iso
 
 clean:
-	rm src/kernel/kernel.o
-	rm boot.o
-	rm mars.iso
-	rm src/libc/string/string.o
-	rm idt.asm.o
-	rm src/idt/idt.o
-	rm src/memory/memory.o
-	rm src/terminal/terminal.o
+	rm $(shell find . -type f -iname '*.o')
+	rm $(TARGET).iso

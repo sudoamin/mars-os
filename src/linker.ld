@@ -1,7 +1,7 @@
 ENTRY(_start)
 SECTIONS
 {
-    . = 0x00100000;
+    . = 0x100000;
     .text ALIGN (0x1000) :
     {
         *(.text)
@@ -21,5 +21,10 @@ SECTIONS
     {
         *(COMMON)
         *(.bss)
+    }
+
+    .asm : ALIGN(0x1000)
+    {
+        *(.asm)
     }
 }

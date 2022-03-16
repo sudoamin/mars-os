@@ -8,12 +8,15 @@ start:
       mov ss, ax
       mov sp, 0x7c00
 
+      call clear_screen
+      
       mov si, Message
       call print
 
       jmp $
 
 print:
+      pusha
       mov bx, 0
 .loop:
       lodsb
@@ -22,11 +25,18 @@ print:
       call print_char
       jmp .loop
 .done:
+      popa
       ret
 
 print_char: 
       mov ah, 0eh
       int 0x10
+      ret
+
+clear_screen:
+      mov al, 02h
+      mov ah, 00h
+      int 10h
       ret
 
 Message: db "RealMode ...", 0

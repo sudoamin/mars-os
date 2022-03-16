@@ -1,20 +1,3 @@
-[BITS 16]
-[ORG 0x7c00]
-
-start:
-      xor ax, ax
-      mov ds, ax
-      mov es, ax
-      mov ss, ax
-      mov sp, 0x7c00
-
-      call clear_screen
-      
-      mov si, Message
-      call print
-
-      jmp $
-
 print:
       pusha
       mov bx, 0
@@ -38,8 +21,3 @@ clear_screen:
       mov ah, 00h
       int 10h
       ret
-
-Message: db "RealMode ...", 0
-
-times 510-($-$$) db 0
-dw 0xaa55

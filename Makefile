@@ -1,7 +1,7 @@
 all: boot.bin
 
 boot.bin:
-	nasm -f bin boot_loader/boot_loader.asm -o boot.bin
+	nasm -f bin bootloader/bootloader.asm -o boot.bin
 
 image:
 	dd if=boot.bin of=boot.img bs=512 count=1 conv=notrunc

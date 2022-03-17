@@ -3,8 +3,9 @@
 
 jmp start
 
-%include "boot_loader/print.asm"
-%include "boot_loader/disk.asm"
+%include "bootloader/print.asm"
+%include "bootloader/longmode.asm"
+%include "bootloader/disk.asm"
 
 start:
       xor ax, ax
@@ -17,13 +18,16 @@ start:
       mov si, Message
       call print
 
+      ; call TestLongModeSupport
+      call TestDiskExtension
+
       jmp end
 
 end:
       hlt
       jmp $
 
-Message: db "RealMode ...", 0
+Message: db "RealMode ...", 0ah, 0dh, 0
 
 times 510-($-$$) db 0
 dw 0xaa55

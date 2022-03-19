@@ -33,7 +33,7 @@ PMEntry:
       mov dword[0x80000], 0x81007
       mov dword[0x81000], 10000111b
 
-      lgdt [GDT32Ptr]
+      lgdt [GDT64Ptr]
 
       ; bit 5 in cr4 register is called physical address extension
       ; set it to 1
@@ -65,7 +65,9 @@ PMEntry:
 ;       jmp PBEnd
 
 GDT32:
+      ; the first entry
       dq 0 ; each entry is 8 bytes, dq to allocate 8 bytes space
+; the code segment entry
 Code32:
       dw 0xffff
       dw 0
@@ -73,6 +75,7 @@ Code32:
       db 0x9a
       db 0xcf
       db 0
+; the data segment entry
 Data32:
       dw 0xffff
       dw 0

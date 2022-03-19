@@ -1,26 +1,25 @@
 [BITS 16]
 [ORG 0x7c00]
 
-jmp start
+jmp Start
 
 %include "bootloader/print.asm"
-; %include "bootloader/longmode.asm"
 %include "bootloader/disk.asm"
-%include "bootloader/gdt.asm"
 %include "bootloader/idt.asm"
 
-start:
+; in real mode we can use the BIOS functions
+Start:
       cli ; clear interrupts
       xor ax, ax
       mov ds, ax
       mov es, ax
       mov ss, ax
-      mov sp, 0x7c00
+      mov sp, 0x7c00 ; the stack pointer in real mode
       sti ; enables interrupts
 
-      call clear_screen
+      call ClearScreen
       mov si, Message
-      call print
+      call Print
 
       ; call LoadKernel ; TODO
 
@@ -35,7 +34,7 @@ start:
 
       jmp 8:PMEntry
 
-end:
+End:
       hlt
       jmp $
 
@@ -46,4 +45,4 @@ Message: db "RealMode ...", 0ah, 0dh, 0
 times 510-($-$$) db 0
 dw 0xaa55
 
-buffer: ; for loading kernel
+Buffer: ; for loading kernel

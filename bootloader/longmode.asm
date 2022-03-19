@@ -30,5 +30,5 @@ LongModeNotSuported:
       jmp end ; bootloader
 
 MSGLongModeChecking: db "Checking Long Mode Support ...", 0ah, 0dh, 0
-MSGLongModeNotSupported: db "Long Mode not supported" 0ah, 0dh, 0
+MSGLongModeNotSupported: db "* Long Mode not supported" 0ah, 0dh, 0
 MSGLongModeSupported: db "Long Mode is supported", 0ah, 0dh, 0

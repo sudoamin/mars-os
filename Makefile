@@ -1,14 +1,18 @@
 all: boot.bin
 
 boot.bin:
-	nasm -f bin bootloader/bootloader.asm -o boot.bin
+	nasm -f bin bootloader/bootloader.asm -o build/boot.bin
 
 image:
-	dd if=boot.bin of=boot.img bs=512 count=1 conv=notrunc
+	dd if=build/boot.bin of=build/boot.img bs=512 count=1 conv=notrunc
 
 run:
-	qemu-system-x86_64 boot.img
+	qemu-system-x86_64 build/boot.img
+
+text:
+	echo "Hello World" >> build/msg.txt
+	dd if=build/msg.txt >> build/boot.img
+	dd if=/dev/zero bs=512 count=1 >> build/boot.img
 
 clean:
-	rm boot.bin
-	rm boot.img
+	rm -rf build/*

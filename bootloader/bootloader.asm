@@ -8,7 +8,6 @@ jmp start
 %include "bootloader/disk.asm"
 %include "bootloader/gdt.asm"
 %include "bootloader/idt.asm"
-%include "bootloader/pm.asm"
 
 start:
       cli ; clear interrupts
@@ -41,6 +40,8 @@ end:
       jmp $
 
 Message: db "RealMode ...", 0ah, 0dh, 0
+
+%include "bootloader/pm.asm"
 
 times 510-($-$$) db 0
 dw 0xaa55

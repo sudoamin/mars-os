@@ -4,8 +4,11 @@
 jmp start
 
 %include "bootloader/print.asm"
-%include "bootloader/longmode.asm"
+; %include "bootloader/longmode.asm"
 %include "bootloader/disk.asm"
+%include "bootloader/gdt.asm"
+%include "bootloader/idt.asm"
+%include "bootloader/pm.asm"
 
 start:
       cli ; clear interrupts
@@ -20,9 +23,18 @@ start:
       mov si, Message
       call print
 
-      call LoadKernel
+      ; call LoadKernel ; TODO
 
-      jmp end
+      ; ENABLE PROTECTED MODE
+      cli
+      lgdt [GDT32Ptr]
+      lidt [IDT32Ptr] ; invalid address, I do not want deal with idt in protected mode
+
+      mov eax, cr0
+      or eax, 1
+      mov cr0, eax
+
+      jmp 8:PMEntry
 
 end:
       hlt

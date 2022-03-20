@@ -4,16 +4,8 @@ LMEntry:
       mov rsp, 0x7c00 ; the stack pointer in long mode or 64-bit mode
 
       ; TODO, print long mode
-      mov byte[0xb8000], 'L'
-      mov byte[0xb8001], 0xa
-      mov byte[0xb8002], 'M'
-      mov byte[0xb8003], 0xa
 
-      jmp LMEnd
-
-LMEnd:
-      hlt
-      jmp LMEnd
+      jmp 0x9000
 
 
 GDT64:

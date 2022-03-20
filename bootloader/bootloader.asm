@@ -21,7 +21,7 @@ Start:
       mov si, Message
       call Print
 
-      ; call LoadKernel ; TODO
+      call LoadKernel
 
       ; ENABLE PROTECTED MODE
       cli
@@ -44,5 +44,3 @@ Message: db "RealMode ...", 0ah, 0dh, 0
 
 times 510-($-$$) db 0
 dw 0xaa55
-
-Buffer: ; for loading kernel

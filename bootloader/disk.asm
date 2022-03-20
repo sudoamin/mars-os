@@ -1,26 +1,18 @@
-; %include "bootloader/print.asm"
-
-; TODO
 ; using the BIOS functions
+; loads kernel to 0x9000
 LoadKernel:
-      pusha
-
       mov ah, 2 ; Read sector command
-      mov al, 1 ; One sector to read
+      mov al, 100 ; x sector to read
       mov ch, 0 ; Cylinder low eight bits
-      mov cl, 2 ; Read sector two
+      mov cl, 2 ; Read sector x
       mov dh, 0 ; head number
-      mov bx, Buffer ; bootloader.asm
+      mov bx, 0x9000 ; bootloader.asm
       int 0x13
       jc ErrLoadKernel
-
-      mov si, Buffer
-      call Print
-
+      
       mov si, MSGKernelLoaded
       call Print
 
-      popa
       ret
 
 ErrLoadKernel:

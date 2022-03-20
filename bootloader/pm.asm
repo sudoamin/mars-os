@@ -58,11 +58,6 @@ PMEntry:
       ; then the offset of long mode
       jmp 8:LMEntry
 
-      ; jmp PBEnd
-
-; PBEnd:
-;       hlt
-;       jmp PBEnd
 
 GDT32:
       ; the first entry

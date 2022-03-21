@@ -1,22 +1,22 @@
-Print:
+print:
       pusha
       mov bx, 0
 .loop:
       lodsb
       cmp al, 0
       je .done
-      call PrintChar
+      call print_char
       jmp .loop
 .done:
       popa
       ret
 
-PrintChar: 
+print_char: 
       mov ah, 0eh
       int 0x10
       ret
 
-ClearScreen:
+clear_screen:
       mov al, 02h
       mov ah, 00h
       int 10h

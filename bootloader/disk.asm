@@ -1,24 +1,27 @@
 ; using the BIOS functions
 ; loads kernel to 0x9000
-LoadKernel:
+load_kernel:
+      mov si, MSG_LOADING_KERNEL
+      call print
+
       mov ah, 2 ; Read sector command
       mov al, 100 ; x sector to read
       mov ch, 0 ; Cylinder low eight bits
       mov cl, 2 ; Read sector x
       mov dh, 0 ; head number
-      mov bx, 0x9000 ; bootloader.asm
+      mov bx, 0x9000
       int 0x13
-      jc ErrLoadKernel
+      jc err_load_kernel
       
-      mov si, MSGKernelLoaded
-      call Print
+      mov si, MSG_KERNEL_LOADED
+      call print
 
       ret
 
-ErrLoadKernel:
-      mov si, MSGFailedLoadKernel
-      call Print
-      jmp End ; bootloader.asm
+err_load_kernel:
+      mov si, MSG_FAILED_LOAD_KERNEL
+      call print
+      jmp end ; bootloader.asm
 
 ; TestDiskExtension:
 ;       pusha
@@ -49,5 +52,6 @@ ErrLoadKernel:
 ; MSGDiskExtChecking: db "Checking Disk Extention ...", 0ah, 0dh, 0
 ; MSGDiskExtNotSupported: db "* Disk extension not supported", 0ah, 0dh, 0
 ; MSGDiskExtSupported: db "Disk extension is supported", 0ah, 0dh, 0
-MSGFailedLoadKernel: db "* Failed to load kernel", 0ah, 0dh, 0
-MSGKernelLoaded: db "Kernel has loaded", 0ah, 0dh, 0
+MSG_LOADING_KERNEL: db "Loading kernel...", 0ah, 0dh, 0
+MSG_FAILED_LOAD_KERNEL: db "* Failed to load kernel", 0ah, 0dh, 0
+MSG_KERNEL_LOADED: db "Kernel has loaded", 0ah, 0dh, 0

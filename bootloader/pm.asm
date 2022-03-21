@@ -3,7 +3,7 @@
 [BITS 32]
 
 ; in protected mode and long mode we can not use the BIOS functions
-PMEntry:
+protected_mode:
       mov ax, 0x10
       mov ds, ax
       mov es, ax
@@ -33,7 +33,7 @@ PMEntry:
       mov dword[0x80000], 0x81007
       mov dword[0x81000], 10000111b
 
-      lgdt [GDT64Ptr]
+      lgdt [GDT64_PTR]
 
       ; bit 5 in cr4 register is called physical address extension
       ; set it to 1
@@ -56,14 +56,14 @@ PMEntry:
 
       ; 8 -> since each entry is 8 bytes and the code segment selector is the second entry
       ; then the offset of long mode
-      jmp 8:LMEntry
+      jmp 8:lm_init
 
 
 GDT32:
       ; the first entry
       dq 0 ; each entry is 8 bytes, dq to allocate 8 bytes space
 ; the code segment entry
-Code32:
+CODE32:
       dw 0xffff
       dw 0
       db 0
@@ -71,7 +71,7 @@ Code32:
       db 0xcf
       db 0
 ; the data segment entry
-Data32:
+DATA32:
       dw 0xffff
       dw 0
       db 0
@@ -79,8 +79,8 @@ Data32:
       db 0xcf
       db 0
 
-GDT32Len: equ $ - GDT32
+GDT32_LEN: equ $ - GDT32
 
-GDT32Ptr:
-      dw GDT32Len - 1
+GDT32_PTR:
+      dw GDT32_LEN - 1
       dd GDT32

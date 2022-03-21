@@ -1,6 +1,6 @@
 [BITS 64]
 
-LMEntry:
+lm_init:
       mov rsp, 0x7c00 ; the stack pointer in long mode or 64-bit mode
 
       ; TODO, print long mode
@@ -20,10 +20,10 @@ GDT64:
       ; L or long mode should be 1, indicating that the code segment runs in 64-bit mode
       dq 0x0020980000000000
 
-GDT64Len: equ $-GDT64
+GDT64_LEN: equ $-GDT64
 
-GDT64Ptr:
-      dw GDT64Len - 1
+GDT64_PTR:
+      dw GDT64_LEN - 1
       dd GDT64
 
 ; TestLongModeSupport:

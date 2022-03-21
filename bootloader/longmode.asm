@@ -1,9 +1,7 @@
 [BITS 64]
 
-lm_init:
+long_mode:
       mov rsp, 0x7c00 ; the stack pointer in long mode or 64-bit mode
-
-      ; TODO, print long mode
 
       jmp 0x9000
 

@@ -10,8 +10,6 @@ protected_mode:
       mov ss, ax
       mov esp, 0x7c00 ; the stack pointer in protected mode
 
-      ; TODO, print protected mode
-
       ; enable the A20 line
       ; https://wiki.osdev.org/A20_Line
       in al, 0x92
@@ -56,7 +54,7 @@ protected_mode:
 
       ; 8 -> since each entry is 8 bytes and the code segment selector is the second entry
       ; then the offset of long mode
-      jmp 8:lm_init
+      jmp 8:long_mode
 
 
 GDT32:

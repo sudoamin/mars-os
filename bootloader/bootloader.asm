@@ -24,7 +24,6 @@ init:
       call load_kernel
 
       ; ENABLE PROTECTED MODE
-      cli
       lgdt [GDT32_PTR]
       lidt [IDT32_PTR] ; invalid address, I do not want deal with idt in protected mode
 

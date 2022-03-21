@@ -15,7 +15,7 @@ init:
       ; ; load GDT (reloading)
       lgdt [GDT_PTR]
       ; ; load IDT
-      ; lgdt [IDT_PTR]
+      lidt [IDT_PTR]
 
 
       push 8
@@ -24,10 +24,11 @@ init:
       retf
 
 main:
-      ; mov byte[0xb8000], 'M'
-      ; mov byte[0xb8001], 0xc
       ; xor rbx, rbx
       ; div rbx
+      ; OR
+      ; int 0h
+
       jmp end
 
 end:
@@ -35,8 +36,8 @@ end:
       jmp end
 
 handler0:
-      ; mov byte[0xb8000], 'D'
-      ; mov byte[0xb8001], 0xc
+      mov byte[0xb8000], 'D'
+      mov byte[0xb8001], 0xc
 
       jmp end
 

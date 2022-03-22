@@ -47,6 +47,7 @@ pic_init:
       out 0x21, al
       out 0xa1, al
 
+      ; TODO
       ; only the IRQ 0 of the master will fire interrupts
       mov al, 11111110b ; only IRQ 0 of master 
       out 0x21, al

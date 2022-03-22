@@ -1,9 +1,18 @@
 [BITS 64]
 [ORG 0x9000]
 
+jmp init
+
+%include "kernel/gdt.asm"
+%include "kernel/idt.asm"
+%include "kernel/pic.asm"
+%include "kernel/pit.asm"
+
 init:
       ; IDT
       mov rdi, IDT
+
+      ; IDT entry for interrupt 0
       mov rax, handler0 ; holds offset of the handler
       ; the offset is divided into three parts in the IDT entry
       mov [rdi], ax ; copy the lower 16 bits of the offset to the location that rdi points to
@@ -12,11 +21,23 @@ init:
       shr rax, 16 ; now bits 32 to 63 are in eax
       mov [rdi+8], eax ; copy the value in eax to the third part of the offset
 
-      ; ; load GDT (reloading)
-      lgdt [GDT_PTR]
-      ; ; load IDT
-      lidt [IDT_PTR]
+      ; IDT entry for the timer
+      ; vector number of the timer is set to 32 in PIC
+      ; so the address of entry is base of IDT + 32 * 16
+      ; Note: each entry in 64-bit takes up 16-byte space
+      mov rax, timer ; holds offset of the timer
+      add rdi, 32*16 ; to make it point to the timer entry
+      mov [rdi], ax
+      shr rax, 16
+      mov [rdi+6], ax
+      shr rax, 16
+      mov [rdi+8], eax
 
+
+      lidt [IDT_PTR] ; load IDT
+
+      ; load GDT (reloading)
+      lgdt [GDT_PTR]
 
       push 8
       push main ; main entry
@@ -28,6 +49,11 @@ main:
       ; div rbx
       ; OR
       ; int 0h
+
+      call pit_init
+      call pic_init
+
+      sti ; enable interrupts
 
       jmp end
 
@@ -43,32 +69,11 @@ handler0:
 
       iretq ; can return to different privilege levels
 
-; %include "kernel/gdt.asm"
-GDT:
-      dq 0
-      dq 0x0020980000000000
 
-GDT_LEN: equ $-GDT
+timer:
+      mov byte[0xb8000], 'T'
+      mov byte[0xb8001], 0xc
 
-GDT_PTR:
-      dw GDT_LEN - 1
-      dq GDT
+      jmp end
 
-; %include "kernel/idt.asm"
-IDT:
-      %rep 256
-            dw 0
-            dw 8 ; the code segment descriptor that we currently use
-            db 0
-            ; attributes field
-            db 0x8E ; D=1 DPL=00 TYPE=01110 -> 10001110
-            dw 0
-            dd 0
-            dd 0
-      %endrep
-
-IDT_LEN: equ $-IDT
-
-IDT_PTR:
-      dw IDT_LEN-1
-      dq IDT
+      iretq ; can return to different privilege levels

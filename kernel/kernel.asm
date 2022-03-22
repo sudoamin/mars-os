@@ -16,7 +16,7 @@ init:
       call gdt_init ; jumps to main
 
 main:
-      ; sti ; enable interrupts
+      sti ; enable interrupts
 
       ; xor rbx, rbx
       ; div rbx

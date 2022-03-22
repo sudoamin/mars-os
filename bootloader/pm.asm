@@ -4,6 +4,8 @@
 
 ; in protected mode and long mode we can not use the BIOS functions
 protected_mode:
+      cli ; disable interrupts, interrupts will be enabled in kernel
+      
       mov ax, 0x10
       mov ds, ax
       mov es, ax

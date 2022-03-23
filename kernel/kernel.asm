@@ -1,6 +1,8 @@
 [BITS 64]
 
+extern kinit
 extern kmain
+
 global init
 
 section .text
@@ -18,9 +20,10 @@ init:
       retf
 
 main:
-      call kmain
-
       sti ; enable interrupts
+
+      call kinit
+      call kmain
 
       ; xor rbx, rbx
       ; div rbx

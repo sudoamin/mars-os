@@ -9,12 +9,19 @@ jmp init
 %include "kernel/idt/pit.asm"
 %include "kernel/idt/handlers.asm"
 %include "kernel/usermode.asm"
+%include "kernel/idt/tss.asm"
 
 init:
+      call gdt_init
       call idt_init
       call pit_init
       call pic_init
-      call gdt_init ; jumps to main
+      call tss_init
+
+      push 8
+      push main ; main entry
+      db 0x48
+      retf
 
 main:
       ; sti ; enable interrupts
@@ -30,15 +37,13 @@ main:
       push 0x18|3
       ; RSP. the stack pointer
       push 0x7c00
-      ; Rflags. only bit 1 which is required
-      push 0x2
+      ; Rflags. bit 1 which is required and enable interrupts
+      push 0x202
       ; cs (code segement) selector = 10 (third descriptor), RPL=3
       push 0x10|3
       ; RIP, the return address
       push um_main
       iretq
-
-      jmp end
 
 end:
       hlt

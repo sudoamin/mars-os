@@ -10,7 +10,10 @@ gdt_init:
 
 GDT:
       dq 0
-      dq 0x0020980000000000
+      dq 0x0020980000000000 ; ring 0, code segment
+      dq 0x0020F80000000000 ; ring 3, code segment, DPL=11=3
+      ; P=1 DPL=11 W=1      
+      dq 0x0000F20000000000 ; ring 3, data segment
 
 GDT_LEN: equ $-GDT
 

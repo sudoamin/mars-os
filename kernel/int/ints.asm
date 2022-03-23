@@ -37,6 +37,4 @@ handle_sirq:
       out 0x20, al
 
 .end
-
-
       iretq

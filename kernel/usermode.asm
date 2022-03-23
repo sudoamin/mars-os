@@ -6,6 +6,7 @@ um_main:
       jne um_end
 
       mov byte[0xb8010], 'u'
+      ; inc byte[0xb8010]
       mov byte[0xb8011], 0xe
 
 um_end:

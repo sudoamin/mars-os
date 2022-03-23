@@ -1,8 +1,4 @@
-[BITS 64]
-
 ; The 8259 Programmable Interrupt Controller (PIC)
-
-; Read OSDEV document for more details
 ; https://wiki.osdev.org/8259_PIC
 
 ; PIC has command regsiter and data register

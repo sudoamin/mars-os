@@ -1,3 +1,5 @@
+; the interrupt handlers
+
 handle_0:
       mov byte[0xb8000], 'D'
       mov byte[0xb8001], 0xc

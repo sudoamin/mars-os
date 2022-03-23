@@ -1,8 +1,4 @@
-[BITS 64]
-
 ; The Programmable Interval Timer (PIT) chip
-
-; Read OSDEV document for more details
 ; https://wiki.osdev.org/Programmable_Interval_Timer
 
 ; PIT has four registers

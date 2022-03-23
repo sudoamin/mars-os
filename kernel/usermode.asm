@@ -1,5 +1,3 @@
-[BITS 64]
-
 um_main:
       ; if the value of cs is 3, it means that we are running in Ring 3
       mov ax, cs

@@ -1,3 +1,6 @@
+; Global Descriptor Table
+; https://wiki.osdev.org/Global_Descriptor_Table
+
 gdt_init:
       ; load GDT (reloading)
       lgdt [GDT_PTR]

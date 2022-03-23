@@ -1,3 +1,6 @@
+; Interrupt Descriptor Table
+; https://wiki.osdev.org/Interrupt_Descriptor_Table
+
 idt_init:
       ; IDT
       mov rdi, IDT

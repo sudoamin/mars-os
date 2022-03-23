@@ -1,5 +1,7 @@
-; Task State Segment
+; Task State Segment structure
 ; https://wiki.osdev.org/Task_State_Segment
+
+; the TSS is stored in the GDT
 
 tss_init:
       mov rax, TSS

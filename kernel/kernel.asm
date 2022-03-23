@@ -4,12 +4,12 @@
 jmp init
 
 %include "kernel/gdt/gdt.asm"
-%include "kernel/idt/idt.asm"
-%include "kernel/idt/pic.asm"
-%include "kernel/idt/pit.asm"
-%include "kernel/idt/handlers.asm"
+%include "kernel/int/idt.asm"
+%include "kernel/int/pic.asm"
+%include "kernel/int/pit.asm"
+%include "kernel/int/ints.asm"
 %include "kernel/usermode.asm"
-%include "kernel/idt/tss.asm"
+%include "kernel/tss.asm"
 
 init:
       call gdt_init

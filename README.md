@@ -1,6 +1,6 @@
 # MARS OS    
 
-# Run   
+# Build & Run   
 Make sure you have installed [qemu-system-x86_64](https://archlinux.org/packages/extra/x86_64/qemu)
 ```console
 make && make run && make clean

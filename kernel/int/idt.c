@@ -1,9 +1,3 @@
-// Interrupt Descriptor Table
-// https://wiki.osdev.org/Interrupt_Descriptor_Table
-
-// assembly implementation
-// https://github.com/sudoamin/mars-os/tree/21d703a1d8b755fd39ca868c6edbe0277127771d/kernel/int
-
 #include "idt.h"
 
 static struct idt_entry idt[TOTAL_INTERRUPTS];

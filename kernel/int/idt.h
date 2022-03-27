@@ -1,4 +1,8 @@
+// Interrupt Descriptor Table
 // https://wiki.osdev.org/Interrupt_Descriptor_Table
+
+// assembly implementation
+// https://github.com/sudoamin/mars-os/tree/21d703a1d8b755fd39ca868c6edbe0277127771d/kernel/int
 
 #ifndef IDT_H
 #define IDT_H
@@ -25,8 +29,13 @@ struct idt_ptr {
 
 void idt_init(void);
 
+// implemented in idt.asm
+extern void load_idt(struct idt_ptr *ptr);
+extern void eoi(void);
+extern unsigned char read_isr(void);
+
 struct trap_frame {
-  int64_t r15; // RSP  low address
+  int64_t r15;  // RSP  low address
   int64_t r14;
   int64_t r13;
   int64_t r12;
@@ -47,9 +56,10 @@ struct trap_frame {
   int64_t cs;
   int64_t rflags;
   int64_t rsp;
-  int64_t ss; // high address
+  int64_t ss;  // high address
 };
 
+// calls from the IDT
 void vector0(void);
 void vector1(void);
 void vector2(void);
@@ -69,10 +79,5 @@ void vector17(void);
 void vector19(void);
 void vector32(void);
 void vector39(void);
-
-void eoi(void);
-unsigned char read_isr(void);
-
-extern void load_idt(struct idt_ptr *ptr);
 
 #endif

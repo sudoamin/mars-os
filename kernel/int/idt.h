@@ -69,8 +69,10 @@ void vector17(void);
 void vector19(void);
 void vector32(void);
 void vector39(void);
+
 void eoi(void);
 unsigned char read_isr(void);
+
 extern void load_idt(struct idt_ptr *ptr);
 
 #endif

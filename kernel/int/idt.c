@@ -1,3 +1,9 @@
+// Interrupt Descriptor Table
+// https://wiki.osdev.org/Interrupt_Descriptor_Table
+
+// assembly implementation
+// https://github.com/sudoamin/mars-os/tree/21d703a1d8b755fd39ca868c6edbe0277127771d/kernel/int
+
 #include "idt.h"
 
 static struct idt_entry idt[TOTAL_INTERRUPTS];
@@ -36,25 +42,4 @@ void idt_init() {
   idt_ptr->limit = sizeof(idt) - 1;
   idt_ptr->base = (uint64_t)idt;
   load_idt(idt_ptr);
-}
-
-void handler(struct trap_frame *tf) {
-  unsigned char isr_value;
-
-  switch (tf->trapno) {
-    case 32:
-      eoi();
-      break;
-
-    case 39:
-      isr_value = read_isr();
-      if ((isr_value & (1 << 7)) != 0) {
-        eoi();
-      }
-      break;
-
-    default:
-      while (1) {
-      }
-  }
 }

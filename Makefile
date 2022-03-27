@@ -8,11 +8,12 @@ kernel.bin:
 
 	nasm -f elf64 kernel/int/idt.asm -o build/idt.s.o
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/int/idt.c -o build/idt.o
+	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/int/int.c -o build/int.o
 
 	nasm -f elf64 kernel/kernel.asm -o build/kernel.s.o
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/kernel.c -o build/kernel.o
 
-	ld -nostdlib -T kernel/linker.ld -o build/kernel.elf build/kernel.s.o build/kernel.o build/idt.s.o build/idt.o
+	ld -nostdlib -T kernel/linker.ld -o build/kernel.elf build/kernel.s.o build/kernel.o build/idt.s.o build/idt.o build/int.o
 	objcopy -O binary build/kernel.elf build/kernel.bin
 
 image: boot.bin kernel.bin

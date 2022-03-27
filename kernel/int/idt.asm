@@ -1,6 +1,6 @@
 section .text
 
-extern handler
+extern int_handler
 
 global vector0
 global vector1
@@ -29,7 +29,7 @@ global read_isr
 
 global load_idt
 
-Trap:
+interrupt:
     push rax
     push rbx
     push rcx
@@ -50,9 +50,8 @@ Trap:
     ; mov byte[0xb8011], 0xe
 
     mov rdi, rsp
-    call handler
+    call int_handler
 
-TrapReturn:
     pop r15
     pop r14
     pop r13
@@ -75,107 +74,115 @@ TrapReturn:
 vector0:
     push 0
     push 0
-    jmp Trap
+    jmp interrupt
 
 vector1:
     push 0
     push 1
-    jmp Trap
+    jmp interrupt
 
 vector2:
     push 0
     push 2
-    jmp Trap
+    jmp interrupt
 
 vector3:
     push 0
     push 3
-    jmp Trap
+    jmp interrupt
 
 vector4:
     push 0
     push 4
-    jmp Trap
+    jmp interrupt
 
 vector5:
     push 0
     push 5
-    jmp Trap
+    jmp interrupt
 
 vector6:
     push 0
     push 6
-    jmp Trap
+    jmp interrupt
 
 vector7:
     push 0
     push 7
-    jmp Trap
+    jmp interrupt
 
 
 vector8:
     push 8
-    jmp Trap
+    jmp interrupt
 
 vector10:
     push 10
-    jmp Trap
+    jmp interrupt
 
 vector11:
     push 11
-    jmp Trap
+    jmp interrupt
 
 vector12:
     push 12
-    jmp Trap
+    jmp interrupt
 
 vector13:
     push 13
-    jmp Trap
+    jmp interrupt
 
 vector14:
     push 14
-    jmp Trap
+    jmp interrupt
 
 vector16:
     push 0
     push 16
-    jmp Trap
+    jmp interrupt
 
 vector17:
     push 17
-    jmp Trap
+    jmp interrupt
 
 vector18:
     push 0
     push 18
-    jmp Trap
+    jmp interrupt
 
 vector19:
     push 0
     push 19
-    jmp Trap
+    jmp interrupt
 
 ; the timer interrupt handler
 vector32:
     push 0
     push 32
-    jmp Trap
+    jmp interrupt
 
 vector39:
     push 0
     push 39
-    jmp Trap
+    jmp interrupt
 
+; when handling the hardware interrupts,
+; we need to acknowledge before return from the handler
+; otherwise we'll not receive the interrupt again
 eoi:
     mov al, 0x20
     out 0x20, al
     ret
 
+; check to know this is a spurious interrupt
+; read the ISR register of the PIC and check bit 7
 read_isr:
-    mov al, 11
+    mov al, 11 ; write value 3 to command register (means reading ISR register)
     out 0x20, al
-    in al, 0x20
+    in al, 0x20 ; read the command register
+    ; moved to C
+    ; test al, (1<<7)
+    ; jz .end
     ret
 
 load_idt:

@@ -1,56 +1,183 @@
-; Interrupt Descriptor Table
-; https://wiki.osdev.org/Interrupt_Descriptor_Table
+section .text
 
-idt_init:
-      ; IDT
-      mov rdi, IDT
+extern handler
 
-      ; IDT entry for interrupt 0
-      mov rax, handle_0 ; holds offset of the handler
-      call set_handler
+global vector0
+global vector1
+global vector2
+global vector3
+global vector4
+global vector5
+global vector6
+global vector7
+global vector8
+; global vector9
+global vector10
+global vector11
+global vector12
+global vector13
+global vector14
+; global vector15
+global vector16
+global vector17
+global vector18
+global vector19
+global vector32
+global vector39
+global eoi
+global read_isr
 
-      ; IDT entry for the timer
-      ; vector number of the timer is set to 32 in PIC
-      ; so the address of entry is base of IDT + 32 * 16
-      ; Note: each entry in 64-bit takes up 16-byte space
-      mov rax, handle_timer ; holds offset of the timer
-      mov rdi, IDT+32*16 ; to make it point to the timer entry
-      call set_handler
+global load_idt
 
-      ; IDT entry for spurious interrupts
-      ; the vector number for IRQ 7 is 32+7
-      ; and each entry is 16 bytes
-      mov rdi, IDT+32*16+7*16
-      mov rax, handle_sirq
-      call set_handler
+Trap:
+    push rax
+    push rbx
+    push rcx
+    push rdx
+    push rsi
+    push rdi
+    push rbp
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
+    push r15
 
-      lidt [IDT_PTR] ; load IDT
+    ; inc byte[0xb8010]
+    ; mov byte[0xb8011], 0xe
 
-      ret
+    mov rdi, rsp
+    call handler
 
-set_handler:
-      mov [rdi], ax ; copy the lower 16 bits of the offset to the location that rdi points to
-      shr rax, 16 ; shift offset in rax rightward by 16 bits. then the bits 16 to 31 are in ax
-      mov [rdi+6], ax ; copy the bits 16 to 31 of the offset to the second part, which is at the 7th byte in the entry
-      shr rax, 16 ; now bits 32 to 63 are in eax
-      mov [rdi+8], eax ; copy the value in eax to the third part of the offset
+TrapReturn:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rbp
+    pop rdi
+    pop rsi
+    pop rdx
+    pop rcx
+    pop rbx
+    pop rax
 
-      ret
+    add rsp, 16
+    iretq
 
-IDT:
-      %rep 256
-            dw 0
-            dw 8 ; the code segment descriptor that we currently use
-            db 0
-            ; attributes field
-            db 0x8E ; D=1 DPL=00 TYPE=01110 -> 10001110
-            dw 0
-            dd 0
-            dd 0
-      %endrep
+vector0:
+    push 0
+    push 0
+    jmp Trap
 
-IDT_LEN: equ $-IDT
+vector1:
+    push 0
+    push 1
+    jmp Trap
 
-IDT_PTR:
-      dw IDT_LEN-1
-      dq IDT
+vector2:
+    push 0
+    push 2
+    jmp Trap
+
+vector3:
+    push 0
+    push 3
+    jmp Trap
+
+vector4:
+    push 0
+    push 4
+    jmp Trap
+
+vector5:
+    push 0
+    push 5
+    jmp Trap
+
+vector6:
+    push 0
+    push 6
+    jmp Trap
+
+vector7:
+    push 0
+    push 7
+    jmp Trap
+
+
+vector8:
+    push 8
+    jmp Trap
+
+vector10:
+    push 10
+    jmp Trap
+
+vector11:
+    push 11
+    jmp Trap
+
+vector12:
+    push 12
+    jmp Trap
+
+vector13:
+    push 13
+    jmp Trap
+
+vector14:
+    push 14
+    jmp Trap
+
+vector16:
+    push 0
+    push 16
+    jmp Trap
+
+vector17:
+    push 17
+    jmp Trap
+
+vector18:
+    push 0
+    push 18
+    jmp Trap
+
+vector19:
+    push 0
+    push 19
+    jmp Trap
+
+; the timer interrupt handler
+vector32:
+    push 0
+    push 32
+    jmp Trap
+
+vector39:
+    push 0
+    push 39
+    jmp Trap
+
+eoi:
+    mov al, 0x20
+    out 0x20, al
+    ret
+
+read_isr:
+    mov al, 11
+    out 0x20, al
+    in al, 0x20
+    ret
+
+load_idt:
+    lidt [rdi]
+    ret

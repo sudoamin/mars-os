@@ -30,7 +30,7 @@ struct idt_ptr {
 void idt_init(void);
 
 // implemented in idt.asm
-extern void load_idt(struct idt_ptr *ptr);
+extern void load_idt(struct idt_ptr* ptr);
 extern void eoi(void);
 extern unsigned char read_isr(void);
 

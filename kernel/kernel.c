@@ -1,3 +1,4 @@
+#include "../include/debug.h"
 #include "int/idt.h"
 
 void kinit(void) {
@@ -12,6 +13,8 @@ int kmain(void) {
   p[51] = 0xa;
 
   idt_init();
+
+  ASSERT(0);
 
   return 0;
 }

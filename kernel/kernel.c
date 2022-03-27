@@ -1,20 +1,14 @@
+#include "../include/console.h"
 #include "../include/debug.h"
 #include "int/idt.h"
 
-void kinit(void) {
-  char* p = (char*)0xb8000;
-  p[52] = 'i';
-  p[53] = 0xa;
-}
+void kinit(void) {}
 
-int kmain(void) {
-  char* p = (char*)0xb8000;
-  p[50] = 'c';
-  p[51] = 0xa;
-
+void kmain(void) {
+  cosnole_init();
   idt_init();
 
-  ASSERT(0);
-
-  return 0;
+  print("Welcome to MarsOS \n");
+  
+  // ASSERT(0);
 }

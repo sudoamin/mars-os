@@ -1,6 +1,7 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include "../include/console.h"
 #include "stdint.h"
 
 #define ASSERT(e)                              \

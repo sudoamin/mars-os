@@ -2,6 +2,6 @@
 #define KERNEL_H
 
 void kinit();
-int kmain();
+void kmain();
 
 #endif

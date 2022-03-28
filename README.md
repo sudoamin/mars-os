@@ -1,4 +1,6 @@
 # MARS OS    
+MarsOS is a simple 64-bit operating system developed for learning    
+Feel free to contribute to MarsOS
 
 # Build & Run   
 Make sure you have installed [qemu-system-x86_64](https://archlinux.org/packages/extra/x86_64/qemu)

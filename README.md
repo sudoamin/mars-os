@@ -1,4 +1,4 @@
-![mars os](https://raw.githubusercontent.com/sudoamin/mars-os/76055030c86799d9bd27b4968d23cff5a6ec5692/doc/mars-os.png)
+# MarsOS
 MarsOS is a simple 64-bit operating system developed for learning    
 Feel free to contribute to MarsOS
 

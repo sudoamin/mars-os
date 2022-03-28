@@ -8,6 +8,10 @@ global init
 section .text
 
 init:
+      call disable_cursor
+      ; mov bx, 90
+      ; call set_cursor
+      
       call gdt_init
       call pit_init
       call pic_init
@@ -33,3 +37,4 @@ end:
 %include "kernel/int/pic.asm"
 %include "kernel/usermode.asm"
 %include "kernel/tss.asm"
+%include "console/cursor.asm"

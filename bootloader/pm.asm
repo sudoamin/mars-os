@@ -19,19 +19,34 @@ protected_mode:
       out 0x92, al
 
       ; ENABLE LONG MODE
+      ; paging is required in long mode
+      
+      ; START PAGING
+      ; https://wiki.osdev.org/Setting_Up_Paging
 
       ; The address (0x80000 - 0x90000) may be used for BIOS data
       ; We can use memory area from 0x70000 to 0x80000 instead
 
       ; finds a free memory area and intialize the paging structure   
       cld
-      mov edi, 0x80000
+      mov edi, 0x70000
       xor eax, eax
       mov ecx, 0x10000/4
       rep stosd
 
-      mov dword[0x80000], 0x81007
-      mov dword[0x81000], 10000111b
+      mov dword[0x70000], 0x71007 ; U=0 W=1 P=1  here we have 7 instead of 3
+      ; the page directory pointer table
+      ; base address of the physical page is set to 0
+      ; the attribute here is set to 3
+      ; bit 7 indicate this is 1G physical page translation
+      mov dword[0x71000], 10000111b 
+
+      mov eax, (0xffff800000000000>>39)
+      and eax, 0x1ff
+      mov dword[0x70000+eax*8], 0x72003
+      mov dword[0x72000], 10000011b
+
+      ; END PAGING
 
       lgdt [GDT64_PTR]
 
@@ -42,7 +57,7 @@ protected_mode:
       mov cr4, eax
 
       ; copy the address of the page structure
-      mov eax, 0x80000
+      mov eax, 0x70000
       mov cr3, eax
 
       mov ecx, 0xc0000080

@@ -3,7 +3,8 @@
 
 gdt_init:
       ; load GDT (reloading)
-      lgdt [GDT_PTR]
+      mov rax, GDT_PTR
+      lgdt [rax]
 
       ret
       

@@ -18,7 +18,8 @@ init:
       call tss_init
 
       push 8
-      push main ; main entry
+      mov rax, main
+      push rax
       db 0x48
       retf
 

@@ -3,7 +3,7 @@ ENTRY(init)
 
 SECTIONS
 {
-      . = 0x9000;
+      . = 0xffff800000009000;
       .text : {
             *(.text)
       }

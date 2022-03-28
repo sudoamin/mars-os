@@ -57,28 +57,28 @@ char *strcat(char *dest, const char *src) {
   return tmp;
 }
 
-// Fills the first size bytes of memory pointed to
-// by bufptr with the constant byte value.
-void *memset(void *bufptr, int value, size_t size) {
-  unsigned char *buf = (unsigned char *)bufptr;
-  size_t i;
-  for (i = 0; i < size; i++) buf[i] = (unsigned char)value;
-  return bufptr;
-}
+// // Fills the first size bytes of memory pointed to
+// // by bufptr with the constant byte value.
+// void *memset(void *bufptr, int value, size_t size) {
+//   unsigned char *buf = (unsigned char *)bufptr;
+//   size_t i;
+//   for (i = 0; i < size; i++) buf[i] = (unsigned char)value;
+//   return bufptr;
+// }
 
-// Accepts two memory areas and compares the first n byte of the two.
-int memcmp(const void *aptr, const void *bptr, size_t size) {
-  const unsigned char *a = (const unsigned char *)aptr;
-  const unsigned char *b = (const unsigned char *)bptr;
-  size_t i;
-  for (int i = 0; i < size; i++) {
-    if (a[i] < b[i])
-      return -1;
-    else if (b[i] < a[i])
-      return 1;
-  }
-  return 0;
-}
+// // Accepts two memory areas and compares the first n byte of the two.
+// int memcmp(const void *aptr, const void *bptr, size_t size) {
+//   const unsigned char *a = (const unsigned char *)aptr;
+//   const unsigned char *b = (const unsigned char *)bptr;
+//   size_t i;
+//   for (int i = 0; i < size; i++) {
+//     if (a[i] < b[i])
+//       return -1;
+//     else if (b[i] < a[i])
+//       return 1;
+//   }
+//   return 0;
+// }
 
 // Converts a single character into a NULL terminated string.
 char *ctos(char s[2], const char c) {

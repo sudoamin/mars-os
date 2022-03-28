@@ -9,16 +9,18 @@ kernel.bin:
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/int/int.c -o build/int.o
 
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c lib/string.c -o build/string.o
-
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c lib/debug.c -o build/debug.o
+	nasm -f elf64 lib/mem.asm -o build/mem.s.o
 
+	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c console/print.c -o build/print.o
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c console/console.c -o build/console.o
 
 	nasm -f elf64 kernel/kernel.asm -o build/kernel.s.o
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/kernel.c -o build/kernel.o
 
 	ld -nostdlib -T kernel/linker.ld -o build/kernel.elf build/kernel.s.o build/kernel.o \
-	build/idt.s.o build/idt.o build/int.o build/debug.o build/console.o build/string.o
+	build/idt.s.o build/idt.o build/int.o build/debug.o build/console.o build/string.o \
+	build/mem.s.o build/print.o
 	
 	objcopy -O binary build/kernel.elf build/kernel.bin
 

@@ -1,12 +1,15 @@
 #include "kernel.h"
 
-void kinit(void) {}
+#include "../include/mem.h"
 
-void kmain(void) {
+void kinit(void) {
   cosnole_init();
   idt_init();
+  mem_init();
+}
 
-  printk("Welcome to MarsOS \n");
+void kmain(void) {
+  printf("Welcome to MarsOS \n");
 
   // ASSERT(0);
 }

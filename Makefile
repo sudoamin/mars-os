@@ -1,5 +1,7 @@
 all: image
 
+fast: image run clean
+
 boot.bin:
 	nasm -f bin bootloader/bootloader.asm -o build/boot.bin
 
@@ -17,10 +19,11 @@ kernel.bin:
 
 	nasm -f elf64 kernel/kernel.asm -o build/kernel.s.o
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/kernel.c -o build/kernel.o
+	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/mem/mem.c -o build/mem.o
 
 	ld -nostdlib -T kernel/linker.ld -o build/kernel.elf build/kernel.s.o build/kernel.o \
 	build/idt.s.o build/idt.o build/int.o build/debug.o build/console.o build/string.o \
-	build/mem.s.o build/print.o
+	build/mem.s.o build/mem.o build/print.o
 	
 	objcopy -O binary build/kernel.elf build/kernel.bin
 
@@ -30,7 +33,7 @@ image: boot.bin kernel.bin
 	dd if=/dev/zero bs=512 count=100 >> build/mars.img
 
 run:
-	qemu-system-x86_64 build/mars.img
+	qemu-system-x86_64 -m 1024 build/mars.img
 
 clean:
 	rm -rf build/*

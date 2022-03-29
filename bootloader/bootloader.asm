@@ -6,6 +6,7 @@ jmp init
 %include "bootloader/print.asm"
 %include "bootloader/disk.asm"
 %include "bootloader/idt.asm"
+%include "bootloader/mem.asm"
 
 ; in real mode we can use the BIOS functions
 init:
@@ -22,6 +23,7 @@ init:
       call print
 
       call load_kernel
+      call get_mem_info
 
       ; ENABLE PROTECTED MODE
       lgdt [GDT32_PTR]
@@ -37,7 +39,7 @@ end:
       hlt
       jmp $
 
-MSG_WELCOME: db "Welcome to MarsOS", 0ah, 0dh, 0
+MSG_WELCOME: db "MarsOS is booting...", 0ah, 0dh, 0
 
 %include "bootloader/pm.asm"
 

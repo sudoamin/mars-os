@@ -105,7 +105,7 @@ void write_screen(const char *buffer, int size, char color) {
   sb->row = row;
 }
 
-int printk(const char *format, ...) {
+int printf(const char *format, ...) {
   char buffer[1024];
   int buffer_size = 0;
   int64_t integer = 0;
@@ -156,9 +156,9 @@ int printk(const char *format, ...) {
 void clear_screen() {
   for (size_t i = 0; i < 200; i++) {
     for (size_t i = 0; i < 200; i++) {
-      printk(" ");
+      printf(" ");
     }
-    printk("\n");
+    printf("\n");
   }
 
   struct screen_bf *sb = &screen_bf;

@@ -14,7 +14,7 @@ struct screen_bf {
   int row;
 };
 
-int printk(const char *format, ...);
+int printf(const char *format, ...);
 void write_screen(const char *buffer, int size, char color);
 void clear_screen();
 

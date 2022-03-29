@@ -1,5 +1,5 @@
-#ifndef KERNEL_H
-#define KERNEL_H
+#ifndef _KERNEL_H
+#define _KERNEL_H
 
 #include "../console/console.h"
 #include "../include/debug.h"

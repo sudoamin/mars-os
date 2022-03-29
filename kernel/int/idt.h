@@ -4,8 +4,8 @@
 // assembly implementation
 // https://github.com/sudoamin/mars-os/tree/21d703a1d8b755fd39ca868c6edbe0277127771d/kernel/int
 
-#ifndef IDT_H
-#define IDT_H
+#ifndef _IDT_H
+#define _IDT_H
 
 #define KERNEL_CODE_SELECTOR 8
 #define TOTAL_INTERRUPTS 256

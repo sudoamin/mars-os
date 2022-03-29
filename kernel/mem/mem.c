@@ -1,4 +1,4 @@
-#include "../../include/mem.h"
+#include "mem.h"
 
 #include "../../include/debug.h"
 #include "../../include/print.h"
@@ -44,7 +44,7 @@ void mem_init(void) {
 
   mem_end = (uint64_t)free_mem.next + PAGE_SIZE;
   printf("end of memory: %x\n", mem_end);
-  
+
   printf("total free memory: %uMB \n", total_mem / 1024 / 1024);
 }
 

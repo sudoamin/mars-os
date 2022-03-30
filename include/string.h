@@ -3,6 +3,11 @@
 
 #include "stddef.h"
 
+void memset(void *buffer, char value, int size);
+void memmove(void *dst, void *src, int size);
+void memcpy(void *dst, void *src, int size);
+int memcmp(void *src1, void *src2, int size);
+
 size_t strlen(const char *);
 char *strcat(char *d, const char *s);
 char *strcpy(char *d, const char *s);

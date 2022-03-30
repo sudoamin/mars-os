@@ -1,5 +1,10 @@
 #include "../include/print.h"
 
+#include "../include/string.h"
+#include "stdarg.h"
+#include "stddef.h"
+#include "stdint.h"
+
 static struct screen_bf screen_bf = {(char *)0xb8000, 0, 0};
 
 static int udecimal_to_string(char *buffer, int position, uint64_t digits) {

@@ -28,13 +28,19 @@ protected_mode:
       ; We use memory area from 0x70000 to 0x80000 instead
       ; https://wiki.osdev.org/Memory_Map_(x86)
 
-      ; finds a free memory area and intialize the paging structure   
+      ; set zero 10000 bytes of memory starting from 70000
       cld
       mov edi, 0x70000
       xor eax, eax
       mov ecx, 0x10000/4
       rep stosd ; stosd instruction copies the data item from EAX (for doublewords) to the destination string, pointed to by ES:DI in memory.
-
+      
+      ; each entry in the PML4 table represent 512G
+      ; implement only first entry and low 1G. first entry:
+      ; each table takes up 4K space, since the table
+      ; include 512 entries with each entry being 8 bytes
+      ; so the next table address is set to 71000 (0x1000 = 4096 bytes) and 3 for attributes
+      ; this memory only can be access by the kernel (U=0)
       mov dword[0x70000], 0x71007 ; U=0 W=1 P=1  here we have 7 instead of 3
       ; the page directory pointer table
       ; base address of the physical page is set to 0
@@ -43,7 +49,7 @@ protected_mode:
       mov dword[0x71000], 10000111b 
 
       mov eax, (0xffff800000000000>>39)
-      and eax, 0x1ff
+      and eax, 0x1ff ; clear other bits
       mov dword[0x70000+eax*8], 0x72003
       mov dword[0x72000], 10000011b
 
@@ -57,7 +63,7 @@ protected_mode:
       or eax, (1<<5)
       mov cr4, eax
 
-      ; copy the address of the page structure
+      ; address of the PML4 table is 70000
       mov eax, 0x70000
       mov cr3, eax
 

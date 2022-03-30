@@ -10,12 +10,14 @@ jmp init
 
 ; in real mode we can use the BIOS functions
 init:
-      cli ; clear interrupts
       xor ax, ax
-      mov ds, ax
-      mov es, ax
-      mov ss, ax
-      mov sp, 0x7c00 ; the stack pointer in real mode
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	mov ss, ax
+      ; we have almost 30 KiB free space below of 0x7c00
+      mov sp, 0x7c00
       sti ; enables interrupts
 
       call clear_screen

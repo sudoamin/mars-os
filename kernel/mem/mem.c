@@ -12,9 +12,9 @@ static uint64_t mem_end;
 extern char end;
 
 void mem_init(void) {
-  int32_t count = *(int32_t *)0x8000;
+  int32_t count = *(int32_t *)0x7e00;
   uint64_t total_mem = 0;
-  struct E820 *mem_map = (struct E820 *)0x8008;
+  struct E820 *mem_map = (struct E820 *)0x7e08;
   int free_region_count = 0;
 
   ASSERT(count <= 50);

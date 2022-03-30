@@ -6,7 +6,7 @@
 protected_mode:
       cli ; disable interrupts, interrupts will be enabled in kernel
       
-      mov ax, 0x10
+      mov ax, 0x10 ; 16 in hex. third entry in the GDT (data segment)
       mov ds, ax
       mov es, ax
       mov ss, ax
@@ -24,15 +24,16 @@ protected_mode:
       ; START PAGING
       ; https://wiki.osdev.org/Setting_Up_Paging
 
-      ; The address (0x80000 - 0x90000) may be used for BIOS data
-      ; We can use memory area from 0x70000 to 0x80000 instead
+      ; The address (0x80000 - 0x90000) is used for BIOS data
+      ; We use memory area from 0x70000 to 0x80000 instead
+      ; https://wiki.osdev.org/Memory_Map_(x86)
 
       ; finds a free memory area and intialize the paging structure   
       cld
       mov edi, 0x70000
       xor eax, eax
       mov ecx, 0x10000/4
-      rep stosd
+      rep stosd ; stosd instruction copies the data item from EAX (for doublewords) to the destination string, pointed to by ES:DI in memory.
 
       mov dword[0x70000], 0x71007 ; U=0 W=1 P=1  here we have 7 instead of 3
       ; the page directory pointer table

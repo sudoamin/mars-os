@@ -2,6 +2,8 @@
 
 #include "../../include/debug.h"
 #include "../../include/print.h"
+#include "../../include/string.h"
+#include "stdbool.h"
 #include "stddef.h"
 
 // free pages in a linked list
@@ -12,9 +14,11 @@ static struct page page;
 extern char end;
 static uint64_t total_free_mem = 0;
 
+uint64_t pml4;
+
 static void init_free_region(uint64_t v, uint64_t e);
 
-void mem_init(void) {
+void init_mem(void) {
   // E820 structure is initialized in bootloader/mem.asm
   // load e820 structures
   int32_t count = *(int32_t *)0x7e00;
@@ -83,7 +87,7 @@ void *kalloc(void) {
   if (page_address != NULL) {
     ASSERT((uint64_t)page_address % PAGE_SIZE == 0);
     ASSERT((uint64_t)page_address >= (uint64_t)&end);
-    ASSERT((uint64_t)page_address + PAGE_SIZE <= 0xffff00040000000);
+    ASSERT((uint64_t)page_address + PAGE_SIZE <= 0xffff800040000000);
 
     page.next = page_address->next;
   }
@@ -93,3 +97,135 @@ void *kalloc(void) {
 
 // get_free_mem returns total free memory in bytes
 uint64_t get_free_mem(void) { return total_free_mem; }
+
+// find_pml4t_entry finds the entry according to the virtual address
+// the entry points to page directory pointer table
+static PDPTR find_pml4t_entry(uint64_t map, uint64_t v, int alloc,
+                              uint32_t attribute) {
+  PDPTR *map_entry = (PDPTR *)map;
+  PDPTR pdptr = NULL;
+  unsigned int index = (v >> 39) & 0x1FF;
+
+  // if the present bit is set, copy the address to pdpt
+  if ((uint64_t)map_entry[index] & PTE_P) {
+    pdptr = (PDPTR)P2V(PDE_ADDR(map_entry[index]));
+  } else if (alloc == 1) {
+    pdptr = (PDPTR)kalloc();
+    if (pdptr != NULL) {
+      memset(pdptr, 0, PAGE_SIZE);
+      map_entry[index] = (PDPTR)(V2P(pdptr) | attribute);
+    }
+  }
+
+  return pdptr;
+}
+
+// find_pdpt_entry finds the entry in the directory pointer table
+// which points to the page directory table.
+// alloc indicating whether or not we will create a page if it does exist
+static PD find_pdpt_entry(uint64_t pml4, uint64_t vaddr, int alloc,
+                          uint32_t attribute) {
+  PDPTR pdptr = NULL;
+  PD pd = NULL;
+  // index is located from the bits 30 of the virtual address and
+  // is also 9 bits in total
+  unsigned int index = (vaddr >> 30) & 0x1FF;
+
+  pdptr = find_pml4t_entry(pml4, vaddr, alloc, attribute);
+  if (pdptr == NULL) return NULL;
+
+  // find entry using index
+  // if the present bit of attributes is 1, then it means that
+  // the value in the entry points to next level table which is page directory
+  // table
+  if ((uint64_t)pdptr[index] & PTE_P) {
+    // clear attribute bits to get address
+    // convert physical address to virtual
+    pd = (PD)P2V(PDE_ADDR(pdptr[index]));
+  }
+  // if the present bit is not set, then it is an unused entry
+  // if alloc is 1, allocate a new page and set the entry to
+  // make it point to this page
+  else if (alloc == 1) {
+    pd = (PD)kalloc();
+    if (pd != NULL) {
+      memset(pd, 0, PAGE_SIZE);
+      pdptr[index] = (PD)(V2P(pd) | attribute);
+    }
+  }
+
+  return pd;
+}
+
+// in the page directory table, we can set the corresponding entry to
+// map the addresses to the physical page
+// map_pages mapps the address to physical page
+bool map_pages(uint64_t map, uint64_t v, uint64_t e, uint64_t pa,
+               uint32_t attribute) {
+  // aligned virtual addresses
+  uint64_t vstart = PA_DOWN(v);
+  uint64_t vend = PA_UP(e);
+
+  PD pd = NULL;
+  // locate the specific entry in the PD
+  unsigned int index;
+
+  // checks start and end of region
+  ASSERT(v < e);
+  // make sure the physical address we want to map into is page aligned
+  ASSERT(pa % PAGE_SIZE == 0);
+  // checks if end of physical address is outside the range of 1G memory
+  ASSERT(pa + vend - vstart <= 1024 * 1024 * 1024);
+
+  do {
+    // find the page directory pointer table entry which
+    // points to page directory table
+    pd = find_pdpt_entry(map, vstart, 1, attribute);
+    if (pd == NULL) {
+      return false;
+    }
+
+    // index value is 9 bits in total starting from bits 21
+    // so we shift right 21 bits and clear other bits excep the lower 9 bits of
+    // the result
+    index = (vstart >> 21) & 0x1FF;
+    // if the present bit is set, it means that we
+    // remap to the used page
+    ASSERT(((uint64_t)pd[index] & PTE_P) == 0);
+
+    // set entry
+    pd[index] = (PDE)(pa | attribute | PTE_ENTRY);
+
+    // move to the next page
+    vstart += PAGE_SIZE;
+    pa += PAGE_SIZE;
+
+    // if the virtual address is still within the memory region,
+    // we continue the process until we reach end of region
+  } while (vstart + PAGE_SIZE <= vend);
+
+  return true;
+}
+
+// switch_vm loads cr3 register with new PML4 table to make the mapping
+void switch_vm(uint64_t map) { load_cr3(V2P(map)); }
+
+// setup_kvm remaps the kernel using 2MB pages and returns the new PML4 table
+static void setup_kvm(void) {
+  pml4 = (uint64_t)kalloc();
+  ASSERT(pml4 != 0);
+
+  memset((void *)pml4, 0, PAGE_SIZE);
+  uint64_t mem_end = (uint64_t)page.next + PAGE_SIZE;
+  // KERNEL_BASE is start of memory region
+  // PTE_P | PTE_W specify that the kernel memory is readable, writable
+  // and not accessible by user applications
+  bool status =
+      map_pages(pml4, KERNEL_BASE, mem_end, V2P(KERNEL_BASE), PTE_P | PTE_W);
+  ASSERT(status == true);
+}
+
+void init_kvm(void) {
+  setup_kvm();
+  switch_vm(pml4);
+}

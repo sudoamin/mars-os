@@ -27,7 +27,7 @@ struct idt_ptr {
   uint64_t base;  // Base address of the start of the interrupt descriptor table
 } __attribute__((packed));
 
-void idt_init(void);
+void init_idt(void);
 
 // implemented in idt.asm
 extern void load_idt(struct idt_ptr* ptr);

@@ -7,9 +7,10 @@
 #include "mem/mem.h"
 
 void kinit(void) {
-  cosnole_init();
-  idt_init();
-  mem_init();
+  init_console();
+  init_idt();
+  init_mem();
+  init_kvm();
 }
 
 void kmain(void) {

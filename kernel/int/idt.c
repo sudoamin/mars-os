@@ -12,7 +12,7 @@ static void idt_entry_set(struct idt_entry* entry, uint64_t addr,
   entry->offset_3 = (uint32_t)(addr >> 32);
 }
 
-void idt_init() {
+void init_idt() {
   idt_entry_set(&idt[0], (uint64_t)vector0, 0x8e);
   idt_entry_set(&idt[1], (uint64_t)vector1, 0x8e);
   idt_entry_set(&idt[2], (uint64_t)vector2, 0x8e);

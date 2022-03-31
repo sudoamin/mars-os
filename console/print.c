@@ -1,11 +1,12 @@
 #include "../include/print.h"
 
 #include "../include/string.h"
+#include "../kernel/mem/mem.h"
 #include "stdarg.h"
 #include "stddef.h"
 #include "stdint.h"
 
-static struct screen_bf screen_bf = {(char *)0xb8000, 0, 0};
+static struct screen_bf screen_bf = {(char *)P2V(0xb8000), 0, 0};
 
 static int udecimal_to_string(char *buffer, int position, uint64_t digits) {
   char digits_map[10] = "0123456789";

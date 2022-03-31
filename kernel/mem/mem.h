@@ -49,12 +49,17 @@ typedef PD* PDPTR;
 #define PTE_ADDR(p) (((uint64_t)p >> 21) << 21)
 
 void init_mem(void);
+void init_kvm(void);
+
 void* kalloc(void);
 void kfree(uint64_t v);
 uint64_t get_free_mem(void);
 bool map_pages(uint64_t map, uint64_t v, uint64_t e, uint64_t pa,
                uint32_t attribute);
-void init_kvm(void);
+void free_vm(uint64_t map);
+void free_page(uint64_t map, uint64_t v, uint64_t e);
+uint16_t setup_kvm(void);
+bool setup_uvm(uint64_t pml4, uint64_t data, int size);
 
 // mem.asm
 extern void load_cr3(uint64_t map);

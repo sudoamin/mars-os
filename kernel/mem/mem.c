@@ -14,8 +14,6 @@ static struct page page;
 extern char end;
 static uint64_t total_free_mem = 0;
 
-uint64_t pml4;
-
 static void init_free_region(uint64_t v, uint64_t e);
 
 void init_mem(void) {
@@ -61,7 +59,7 @@ static void init_free_region(uint64_t v, uint64_t e) {
     // 0xffff800040000000 is 1G above the base of kernel
     // if the page we are about to initialize is beyond the first 1G of RAM,
     // call kfree Note: we only use the first 1G of RAM
-    if (v + PAGE_SIZE <= 0xffff800040000000) {
+    if (start + PAGE_SIZE <= 0xffff800040000000) {
       kfree(start);
     }
   }
@@ -210,23 +208,33 @@ bool map_pages(uint64_t map, uint64_t v, uint64_t e, uint64_t pa,
 // switch_vm loads cr3 register with new PML4 table to make the mapping
 void switch_vm(uint64_t map) { load_cr3(V2P(map)); }
 
-// setup_kvm remaps the kernel using 2MB pages and returns the new PML4 table
-static void setup_kvm(void) {
-  pml4 = (uint64_t)kalloc();
-  ASSERT(pml4 != 0);
+// each process has its own address space,
+// any changes in one address space will not affect other address spaces
+// so we can setup kernel space and user space for each process
 
-  memset((void *)pml4, 0, PAGE_SIZE);
-  uint64_t mem_end = (uint64_t)page.next + PAGE_SIZE;
-  // KERNEL_BASE is start of memory region
-  // PTE_P | PTE_W specify that the kernel memory is readable, writable
-  // and not accessible by user applications
-  bool status =
-      map_pages(pml4, KERNEL_BASE, mem_end, V2P(KERNEL_BASE), PTE_P | PTE_W);
-  ASSERT(status == true);
+// setup_kvm remaps the kernel using 2MB pages and returns the new PML4 table
+uint16_t setup_kvm(void) {
+  uint64_t pml4 = (uint64_t)kalloc();
+  if (pml4 != 0) {
+    memset((void *)pml4, 0, PAGE_SIZE);
+    uint64_t mem_end = (uint64_t)page.next + PAGE_SIZE;
+    // KERNEL_BASE is start of memory region
+    // PTE_P | PTE_W specify that the kernel memory is readable, writable
+    // and not accessible by user applications
+    bool status =
+        map_pages(pml4, KERNEL_BASE, mem_end, V2P(KERNEL_BASE), PTE_P | PTE_W);
+    if (!status) {
+      free_vm(pml4);
+      return 0;
+    }
+  }
+  return pml4;
 }
 
 void init_kvm(void) {
-  setup_kvm();
+  uint64_t pml4 = setup_kvm();
+  ASSERT(pml4 != 0); 
+
   switch_vm(pml4);
 }
 
@@ -256,11 +264,12 @@ void free_pages(uint64_t map, uint64_t vstart, uint64_t vend) {
     if (pd != NULL) {
       index = (vstart >> 21) & 0x1FF;
       // find corresponding entry and check present bit
-      ASSERT(pd[index] & PTE_P);
-      // the lower 21 bits should be cleared before using the address. PTE_ADDR
-      kfree(P2V(PTE_ADDR(pd[index])));
-      // the entry now is unused
-      pd[index] = 0;
+      if (pd[index] & PTE_P) {
+        // lower 21 bits should be cleared before using the address. PTE_ADDR
+        kfree(P2V(PTE_ADDR(pd[index])));
+        // the entry now is unused
+        pd[index] = 0;
+      }
     }
 
     // move to next page
@@ -314,18 +323,52 @@ static void free_pdpt(uint64_t map) {
 
 static void free_pml4t(uint64_t map) { kfree(map); }
 
-// to free vm we free the physical pages in the user space (not defined yet) as
+// to free vm we free the physical pages in the user space as
 // well as page tables.
 // because we need the page tables to locate the physical pages
 // we first free the pages by calling free_pages
 // then we free the page directory tables
-// and page directory pointer tables
-//
+// and page directory pointer tables.
+// we do not free the kernel page
+// because the kernel page is shared among all the vms
 void free_vm(uint64_t map) {
-  // because we havn't implemented processes and user space
-  // there is no memory pages allocated in the user space so far.
-  // free_pages(map,vstart,vend);
+  // free one page
+  free_pages(map, 0x400000, 0x400000 + PAGE_SIZE);
+
   free_pdt(map);
   free_pdpt(map);
   free_pml4t(map);
+}
+
+// we map only one page for the user programs which means
+// the code, data and stack of the programs are located in the same 2M page.
+
+// start is the location of the program
+// size is the size of the data we will copy
+bool setup_uvm(uint64_t pml4, uint64_t data, int size) {
+  // allocate a page which is used to
+  // store the code and data of the program
+  void *page = kalloc();
+
+  if (page == NULL) {
+    // it could include some random values
+    memset(page, 0, PAGE_SIZE);
+    // map the page using map_pages
+    // because we implement only one page for user application,
+    // we add page size to the base address
+    // and next one is the base of physical page we want to map into
+    // which is the page we allocate
+    bool status = map_pages(pml4, 0x400000, 0x400000 + PAGE_SIZE, V2P(page),
+                            PTE_P | PTE_W | PTE_U);
+    if (status) {
+      memcpy(page, (void *)data, size);
+    } else {
+      kfree((uint64_t)page);
+      free_vm(pml4);
+    }
+
+    return status;
+  }
+
+  return false;
 }

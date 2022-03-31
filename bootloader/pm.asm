@@ -48,9 +48,13 @@ protected_mode:
       ; bit 7 indicate this is 1G physical page translation
       mov dword[0x71000], 10000111b 
 
+      ; Remap the kernel without moving it
       ; clear other bits
       mov eax, (0xffff800000000000>>39)
+      ; 9-bit index value, index 1
       and eax, 0x1ff
+      ; 8: because each entry takes up 8 bytes
+      ; set 0x72003 the table address
       mov dword[0x70000+eax*8], 0x72003
       mov dword[0x72000], 10000011b
 

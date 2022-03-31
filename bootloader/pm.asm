@@ -48,8 +48,9 @@ protected_mode:
       ; bit 7 indicate this is 1G physical page translation
       mov dword[0x71000], 10000111b 
 
+      ; clear other bits
       mov eax, (0xffff800000000000>>39)
-      and eax, 0x1ff ; clear other bits
+      and eax, 0x1ff
       mov dword[0x70000+eax*8], 0x72003
       mov dword[0x72000], 10000011b
 

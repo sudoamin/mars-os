@@ -229,3 +229,103 @@ void init_kvm(void) {
   setup_kvm();
   switch_vm(pml4);
 }
+
+// for freeing memory, we first locate the entry in the page directory table,
+// and free the page using the physical address saved in the entry.
+// when we want to free whole memory, we will free the physical pages first,
+// then we free page directory tables, page directory pointer tables and PML4.
+// Generally, we could have a few page directory pointer tables and page
+// directory tables. so we need to loop through each of the tables.
+
+// free_pages is like reverse process of mapping pages.
+void free_pages(uint64_t map, uint64_t vstart, uint64_t vend) {
+  // index is used to locate entry in the page directory table
+  unsigned int index;
+
+  // vstart and vend have to be aligned
+  ASSERT(vstart % PAGE_SIZE == 0);
+  ASSERT(vend % PAGE_SIZE == 0);
+
+  do {
+    // find the page directory table
+    // alloc is 0 which means
+    // find_pdpt_entry returns null if the entry does not exist
+    // because we want to free the existing page
+    PD pd = find_pdpt_entry(map, vstart, 0, 0);
+
+    if (pd != NULL) {
+      index = (vstart >> 21) & 0x1FF;
+      // find corresponding entry and check present bit
+      ASSERT(pd[index] & PTE_P);
+      // the lower 21 bits should be cleared before using the address. PTE_ADDR
+      kfree(P2V(PTE_ADDR(pd[index])));
+      // the entry now is unused
+      pd[index] = 0;
+    }
+
+    // move to next page
+    vstart += PAGE_SIZE;
+    // continue process until we reach end of memory region
+  } while (vstart + PAGE_SIZE <= vend);
+}
+
+// loop through the PML4 table and page directory pinter tables
+// to find page directory tables.
+static void free_pdt(uint64_t map) {
+  PDPTR *pml4 = (PDPTR *)map;
+
+  // since each entry in PML4 table points to page directory table,
+  // we could have a total of 512 PDP tables
+
+  // loop through each of the entries
+  for (int i = 0; i < 512; i++) {
+    // if the entry is present
+    if ((uint64_t)pml4[i] & PTE_P) {
+      // retrieve the address of the entry that are page directory pointer table
+      PD *pdptr = (PD *)P2V(PDE_ADDR(pml4[i]));
+
+      // the PDP tale also include 512 entries which
+      // points to page directory tables
+      for (int j = 0; j < 512; j++) {
+        // if the entry is valid or present
+        if ((uint64_t)pdptr[j] & PTE_P) {
+          // clear the entry
+          kfree(P2V(PDE_ADDR(pdptr[j])));
+          pdptr[j] = 0;
+        }
+      }
+    }
+  }
+}
+
+// free_pdpt is used to free page directory pointer tables
+static void free_pdpt(uint64_t map) {
+  PDPTR *pml4 = (PDPTR *)map;
+
+  for (int i = 0; i < 512; i++) {
+    // if the entry is used, it frees the page pointed to by the entry
+    // which is page directory pointer table
+    if ((uint64_t)pml4[i] & PTE_P) {
+      kfree(P2V(PDE_ADDR(pml4[i])));
+      pml4[i] = 0;
+    }
+  }
+}
+
+static void free_pml4t(uint64_t map) { kfree(map); }
+
+// to free vm we free the physical pages in the user space (not defined yet) as
+// well as page tables.
+// because we need the page tables to locate the physical pages
+// we first free the pages by calling free_pages
+// then we free the page directory tables
+// and page directory pointer tables
+//
+void free_vm(uint64_t map) {
+  // because we havn't implemented processes and user space
+  // there is no memory pages allocated in the user space so far.
+  // free_pages(map,vstart,vend);
+  free_pdt(map);
+  free_pdpt(map);
+  free_pml4t(map);
+}

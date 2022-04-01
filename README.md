@@ -16,4 +16,5 @@ make && make run && make clean
 5. Memory management
 6. Process management
 7. Filesystem
-8. Network
+8. Network    
+9. Refactoring kernel/proc

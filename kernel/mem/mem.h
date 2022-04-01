@@ -13,14 +13,14 @@ struct E820 {
 } __attribute__((packed));
 
 struct page {
-  struct page* next;
+  struct page *next;
 };
 
-// points to page directoryentry
+// points to page directory entry
 typedef uint64_t PDE;
-typedef PDE* PD;
+typedef PDE *PD;
 // points to page directory
-typedef PD* PDPTR;
+typedef PD *PDPTR;
 
 // the attributes of table entries
 #define PTE_P 1
@@ -51,17 +51,19 @@ typedef PD* PDPTR;
 void init_mem(void);
 void init_kvm(void);
 
-void* kalloc(void);
+void *kalloc(void);
 void kfree(uint64_t v);
 uint64_t get_free_mem(void);
 bool map_pages(uint64_t map, uint64_t v, uint64_t e, uint64_t pa,
                uint32_t attribute);
 void free_vm(uint64_t map);
-void free_page(uint64_t map, uint64_t v, uint64_t e);
-uint16_t setup_kvm(void);
+
+void free_pages(uint64_t map, uint64_t v, uint64_t e);
+uint64_t setup_kvm(void);
 bool setup_uvm(uint64_t pml4, uint64_t data, int size);
+void switch_vm(uint64_t map);
 
 // mem.asm
-extern void load_cr3(uint64_t map);
+void load_cr3(uint64_t map);
 
 #endif

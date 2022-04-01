@@ -26,8 +26,10 @@ global vector32
 global vector39
 global eoi
 global read_isr
+global read_cr2
 
 global load_idt
+global pstart
 
 interrupt:
     push rax
@@ -51,23 +53,26 @@ interrupt:
 
     mov rdi, rsp
     call int_handler
+    ; and interrupt_return executes
 
-    pop r15
-    pop r14
-    pop r13
-    pop r12
-    pop r11
-    pop r10
-    pop r9
-    pop r8
-    pop rbp
-    pop rdi
-    pop rsi
-    pop rdx
-    pop rcx
-    pop rbx
-    pop rax
+interrupt_return:
+    pop	r15
+    pop	r14
+    pop	r13
+    pop	r12
+    pop	r11
+    pop	r10
+    pop	r9
+    pop	r8
+    pop	rbp
+    pop	rdi
+    pop	rsi
+    pop	rdx
+    pop	rcx
+    pop	rbx
+    pop	rax
 
+    ; skip int number and error code
     add rsp, 16
     iretq
 
@@ -110,7 +115,6 @@ vector7:
     push 0
     push 7
     jmp interrupt
-
 
 vector8:
     push 8
@@ -188,3 +192,11 @@ read_isr:
 load_idt:
     lidt [rdi]
     ret
+
+read_cr2:
+    mov rax, cr2
+    ret
+
+pstart:
+    mov rsp, rdi
+    jmp interrupt_return

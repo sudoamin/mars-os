@@ -1,7 +1,7 @@
 [BITS 64]
 
 long_mode:
-      mov rsp, 0xffff800000009000 ; the stack pointer in long mode or 64-bit mode
+      mov rsp, 0xffff800000060000 ; the stack pointer in long mode or 64-bit mode
 
       ; load ss segment selector, otherwise invalid ss selector
       ; could be loaded when the interrupt handlers returns

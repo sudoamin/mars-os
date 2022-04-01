@@ -7,7 +7,9 @@ gdt_init:
       lgdt [rax]
 
       ret
-      
+
+section .data
+
 GDT:
       dq 0
       dq 0x0020980000000000 ; ring 0, code segment
@@ -15,7 +17,7 @@ GDT:
       ; P=1 DPL=11 W=1      
       dq 0x0000F20000000000 ; ring 3, data segment
 TSS_DESC:
-      dw TSS_LEN ; first rwo bytes are the lower 16 bits of TSS limit
+      dw TSS_LEN - 1 ; first two bytes are the lower 16 bits of TSS limit
       dw 0 ; base address of TSS (assign the address in the code)
       db 0 ; the lower 24 bits of base address
       db 0x89 ; the attribute field: P=1, DPL=00, TYPE=01001 specifes this is 64-bit TSS

@@ -1,9 +1,9 @@
 #include "idt.h"
 
 static struct idt_entry idt[TOTAL_INTERRUPTS];
-static struct idt_ptr* idt_ptr;
+static struct idt_ptr *idt_ptr;
 
-static void idt_entry_set(struct idt_entry* entry, uint64_t addr,
+static void idt_entry_set(struct idt_entry *entry, uint64_t addr,
                           uint8_t attr) {
   entry->offset_1 = (uint16_t)addr;
   entry->selector = KERNEL_CODE_SELECTOR;

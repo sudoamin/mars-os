@@ -3,6 +3,8 @@
 
 ; the TSS is stored in the GDT
 
+global TSS
+
 tss_init:
       mov rax, TSS
       mov rdi, TSS_DESC
@@ -24,7 +26,7 @@ TSS:
       ; the first four bytes are reserved
       dd 0
       ; RSP0
-      dq 0xffff800000008000
+      dq 0xffff800000060000
       ; other fields are not used in MarsOS
       times 88 db 0
       ; the address of IO permission

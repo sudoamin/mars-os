@@ -8,11 +8,10 @@
 
 // free pages in a linked list
 static struct page page;
-// end of memory, because the page linked list is reverse
-// (uint64_t)page.next + PAGE_SIZE
 // end of kernel, defined in linker.ld
 extern char end;
 static uint64_t total_free_mem = 0;
+uint64_t mem_end;
 
 static void init_free_region(uint64_t v, uint64_t e);
 
@@ -48,6 +47,8 @@ void init_mem(void) {
     // printf("%x  %uKB  %u\n", mem_map[i].address, mem_map[i].length / 1024,
     //         (uint64_t)mem_map[i].type);
   }
+  // because the page linked list is reverse
+  mem_end = (uint64_t)page.next + PAGE_SIZE;
 }
 
 // init_free_region divids the region into 2MB pages and collect the pages
@@ -213,28 +214,26 @@ void switch_vm(uint64_t map) { load_cr3(V2P(map)); }
 // so we can setup kernel space and user space for each process
 
 // setup_kvm remaps the kernel using 2MB pages and returns the new PML4 table
-uint16_t setup_kvm(void) {
+uint64_t setup_kvm(void) {
   uint64_t pml4 = (uint64_t)kalloc();
   if (pml4 != 0) {
     memset((void *)pml4, 0, PAGE_SIZE);
-    uint64_t mem_end = (uint64_t)page.next + PAGE_SIZE;
     // KERNEL_BASE is start of memory region
     // PTE_P | PTE_W specify that the kernel memory is readable, writable
     // and not accessible by user applications
-    bool status =
-        map_pages(pml4, KERNEL_BASE, mem_end, V2P(KERNEL_BASE), PTE_P | PTE_W);
-    if (!status) {
+    if (!map_pages(pml4, KERNEL_BASE, mem_end, V2P(KERNEL_BASE),
+                   PTE_P | PTE_W)) {
       free_vm(pml4);
-      return 0;
+      pml4 = 0;
     }
   }
+
   return pml4;
 }
 
 void init_kvm(void) {
   uint64_t pml4 = setup_kvm();
-  ASSERT(pml4 != 0); 
-
+  ASSERT(pml4 != 0);
   switch_vm(pml4);
 }
 
@@ -265,7 +264,8 @@ void free_pages(uint64_t map, uint64_t vstart, uint64_t vend) {
       index = (vstart >> 21) & 0x1FF;
       // find corresponding entry and check present bit
       if (pd[index] & PTE_P) {
-        // lower 21 bits should be cleared before using the address. PTE_ADDR
+        // the lower 21 bits should be cleared before using the address.
+        // PTE_ADDR
         kfree(P2V(PTE_ADDR(pd[index])));
         // the entry now is unused
         pd[index] = 0;
@@ -334,7 +334,6 @@ static void free_pml4t(uint64_t map) { kfree(map); }
 void free_vm(uint64_t map) {
   // free one page
   free_pages(map, 0x400000, 0x400000 + PAGE_SIZE);
-
   free_pdt(map);
   free_pdpt(map);
   free_pml4t(map);
@@ -348,27 +347,26 @@ void free_vm(uint64_t map) {
 bool setup_uvm(uint64_t pml4, uint64_t data, int size) {
   // allocate a page which is used to
   // store the code and data of the program
-  void *page = kalloc();
+  void *p = kalloc();
+  bool status = false;
 
-  if (page == NULL) {
+  if (p != NULL) {
     // it could include some random values
-    memset(page, 0, PAGE_SIZE);
+    memset(p, 0, PAGE_SIZE);
     // map the page using map_pages
     // because we implement only one page for user application,
     // we add page size to the base address
     // and next one is the base of physical page we want to map into
     // which is the page we allocate
-    bool status = map_pages(pml4, 0x400000, 0x400000 + PAGE_SIZE, V2P(page),
-                            PTE_P | PTE_W | PTE_U);
-    if (status) {
-      memcpy(page, (void *)data, size);
+    status = map_pages(pml4, 0x400000, 0x400000 + PAGE_SIZE, V2P(p),
+                       PTE_P | PTE_W | PTE_U);
+    if (status == true) {
+      memcpy(p, (void *)data, size);
     } else {
-      kfree((uint64_t)page);
+      kfree((uint64_t)p);
       free_vm(pml4);
     }
-
-    return status;
   }
 
-  return false;
+  return status;
 }

@@ -13,9 +13,9 @@ init:
       ; call set_cursor
       
       call gdt_init
+      call tss_init
       call pit_init
       call pic_init
-      call tss_init
 
       push 8
       mov rax, main
@@ -25,9 +25,8 @@ init:
 
 main:
       call kinit
+      sti
       call kmain
-
-      sti ; enable interrupts
 
 end:
       hlt
@@ -36,6 +35,5 @@ end:
 %include "kernel/int/pit.asm"
 %include "kernel/gdt/gdt.asm"
 %include "kernel/int/pic.asm"
-%include "kernel/usermode.asm"
 %include "kernel/tss.asm"
 %include "console/cursor.asm"

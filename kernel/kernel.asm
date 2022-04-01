@@ -35,5 +35,5 @@ end:
 %include "kernel/int/pit.asm"
 %include "kernel/gdt/gdt.asm"
 %include "kernel/int/pic.asm"
-%include "kernel/tss.asm"
+%include "kernel/proc/tss.asm"
 %include "console/cursor.asm"

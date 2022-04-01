@@ -23,7 +23,7 @@ kernel.bin:
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/mem/mem.c -o build/mem.o
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/proc/proc.c -o build/proc.o
 
-	ld -nostdlib -T kernel/linker.ld -o build/kernel.elf build/kernel.s.o build/kernel.o \
+	ld -nostdlib -T linker.ld -o build/kernel.elf build/kernel.s.o build/kernel.o \
 	build/idt.s.o build/idt.o build/int.o build/debug.o build/console.o build/string.o \
 	build/string.s.o build/mem.o build/mem.s.o build/proc.o build/print.o
 	

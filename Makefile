@@ -18,7 +18,7 @@ kernel.bin: lib.a
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/kernel.c -o build/kernel.o
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/mem/mem.c -o build/mem.o
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/proc/proc.c -o build/proc.o
-	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/syscall.c -o build/syscall.o
+	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/syscall/syscall.c -o build/syscall.o
 
 	ld -nostdlib -T linker.ld -o build/kernel.elf build/kernel.s.o build/kernel.o \
 	build/idt.s.o build/idt.o build/int.o \

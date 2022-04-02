@@ -1,7 +1,7 @@
 #ifndef SYSCALL_H_
 #define SYSCALL_H_
 
-#include "int/idt.h"
+#include "../int/idt.h"
 
 typedef int (*SYSTEMCALL)(int64_t *argptr);
 

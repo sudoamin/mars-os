@@ -6,7 +6,7 @@
 #include "int/idt.h"
 #include "mem/mem.h"
 #include "proc/proc.h"
-#include "syscall.h"
+#include "syscall/syscall.h"
 
 void kinit(void) {
   init_console();
@@ -19,8 +19,8 @@ void kinit(void) {
 void kmain(void) {
   printk("Welcome to MarsOS \n\n");
 
-  init_proc();
-  launch();
+  // init_proc();
+  // launch();
 
   //  printf("total free memory: %uMB \n", get_free_mem() / 1024 / 1024);
 

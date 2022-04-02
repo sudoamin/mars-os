@@ -1,7 +1,7 @@
 #include "syscall.h"
 
-#include "../include/debug.h"
-#include "console/print.h"
+#include "../../include/debug.h"
+#include "../console/print.h"
 #include "stddef.h"
 
 static SYSTEMCALL system_calls[10];

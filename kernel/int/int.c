@@ -1,5 +1,5 @@
 #include "../console/print.h"
-#include "../syscall.h"
+#include "../syscall/syscall.h"
 #include "idt.h"
 
 // int_handler will be called when we jump from ring3 to ring0.

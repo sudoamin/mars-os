@@ -1,7 +1,7 @@
 #include "mem.h"
 
 #include "../../include/debug.h"
-#include "../../include/print.h"
+#include "../console/print.h"
 #include "../../include/string.h"
 #include "stdbool.h"
 #include "stddef.h"
@@ -44,7 +44,7 @@ void init_mem(void) {
         init_free_region((uint64_t)&end, vend);
       }
     }
-    // printf("%x  %uKB  %u\n", mem_map[i].address, mem_map[i].length / 1024,
+    // printk("%x  %uKB  %u\n", mem_map[i].address, mem_map[i].length / 1024,
     //         (uint64_t)mem_map[i].type);
   }
   // because the page linked list is reverse

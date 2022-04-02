@@ -1,6 +1,8 @@
 #ifndef STRING_H
 #define STRING_H
 
+#include <stdint.h>
+
 #include "stddef.h"
 
 void memset(void *buffer, char value, int size);
@@ -17,5 +19,10 @@ char *strncpy(char *dest, const char *src, size_t n);
 char *strstr(char *s1, const char *s2);
 char *strchr(const char *s, int c);
 int strncmp(const char *s1, const char *s2, size_t n);
+
+int udecimal_to_string(char *buffer, int position, uint64_t digits);
+int decimal_to_string(char *buffer, int position, int64_t digits);
+int hex_to_string(char *buffer, int position, uint64_t digits);
+int read_string(char *buffer, int position, const char *string);
 
 #endif

@@ -1,21 +1,23 @@
 #include "kernel.h"
 
-#include "../console/console.h"
 #include "../include/debug.h"
-#include "../include/print.h"
+#include "console/console.h"
+#include "console/print.h"
 #include "int/idt.h"
 #include "mem/mem.h"
 #include "proc/proc.h"
+#include "syscall.h"
 
 void kinit(void) {
   init_console();
   init_idt();
   init_mem();
   init_kvm();
+  init_syscall();
 }
 
 void kmain(void) {
-  printf("Welcome to MarsOS \n\n");
+  printk("Welcome to MarsOS \n\n");
 
   init_proc();
   launch();

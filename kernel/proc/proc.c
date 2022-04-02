@@ -1,8 +1,8 @@
 #include "proc.h"
 
 #include "../../include/debug.h"
-#include "../../include/print.h"
 #include "../../include/string.h"
+#include "../console/print.h"
 #include "../int/idt.h"
 #include "../mem/mem.h"
 
@@ -13,8 +13,6 @@ static struct proc proces[NUM_PROC];
 // pid_num is used to allocate a new proccess
 // with a identification number
 static int pid_num = 1;
-
-void main(void);
 
 // sets the top of kernel stack to rsp0 in tss
 // when we jump from ring3 to ring0,
@@ -70,7 +68,8 @@ static void set_process_entry(struct proc *proc) {
   // create a new uvm
   // (uint64_t)main is the start address of program
   // and then the size of program
-  ASSERT(setup_uvm(proc->pml4, (uint64_t)main, PAGE_SIZE));
+  // 5120 is 10 sectors
+  ASSERT(setup_uvm(proc->pml4, (uint64_t)P2V(0x20000), 5120));
 }
 
 // init_process finds an unused process in the process table
@@ -91,9 +90,4 @@ void launch(void) {
   // rdi = tf
   // and the values are in stack and will be popped to registers
   pstart(proces[0].tf);
-}
-
-void main(void) {
-  char *p = (char *)0xffff800000200020;
-  *p = 1;
 }

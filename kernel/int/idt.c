@@ -33,6 +33,11 @@ void init_idt() {
   idt_entry_set(&idt[32], (uint64_t)vector32, 0x8e);
   idt_entry_set(&idt[39], (uint64_t)vector39, 0x8e);
 
+  // 0xee, set dpl to 3 instead of 0
+  // we will fire the interrupt in ring3 so the dpt should be 3,
+  // otherwise we have no privilege to access this descriptor.
+  idt_entry_set(&idt[0x80], (uint64_t)sysint, 0xee);
+
   idt_ptr->limit = sizeof(idt) - 1;
   idt_ptr->base = (uint64_t)idt;
   load_idt(idt_ptr);

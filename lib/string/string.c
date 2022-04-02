@@ -1,4 +1,6 @@
-#include "../include/string.h"
+#include "../../include/string.h"
+
+#include "stdint.h"
 
 // Searches s1 for the presence of s2. If the string array s2 is found in the
 // string arrays s1, the utility will return a pointer to the location of s2.
@@ -115,3 +117,62 @@ char *rtrim(char *s) {
 }
 
 char *trim(char *s) { return rtrim(ltrim(s)); }
+
+int udecimal_to_string(char *buffer, int position, uint64_t digits) {
+  char digits_map[10] = "0123456789";
+  char digits_buffer[25];
+  int size = 0;
+
+  do {
+    digits_buffer[size++] = digits_map[digits % 10];
+    digits /= 10;
+  } while (digits != 0);
+
+  for (int i = size - 1; i >= 0; i--) {
+    buffer[position++] = digits_buffer[i];
+  }
+
+  return size;
+}
+
+int decimal_to_string(char *buffer, int position, int64_t digits) {
+  int size = 0;
+
+  if (digits < 0) {
+    digits = -digits;
+    buffer[position++] = '-';
+    size = 1;
+  }
+
+  size += udecimal_to_string(buffer, position, (uint64_t)digits);
+  return size;
+}
+
+int hex_to_string(char *buffer, int position, uint64_t digits) {
+  char digits_buffer[25];
+  char digits_map[16] = "0123456789ABCDEF";
+  int size = 0;
+
+  do {
+    digits_buffer[size++] = digits_map[digits % 16];
+    digits /= 16;
+  } while (digits != 0);
+
+  for (int i = size - 1; i >= 0; i--) {
+    buffer[position++] = digits_buffer[i];
+  }
+
+  buffer[position++] = 'H';
+
+  return size + 1;
+}
+
+int read_string(char *buffer, int position, const char *string) {
+  int index = 0;
+
+  for (index = 0; string[index] != '\0'; index++) {
+    buffer[position++] = string[index];
+  }
+
+  return index;
+}

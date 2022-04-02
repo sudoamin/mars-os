@@ -24,6 +24,8 @@ global vector18
 global vector19
 global vector32
 global vector39
+global sysint
+
 global eoi
 global read_isr
 global read_cr2
@@ -168,6 +170,11 @@ vector32:
 vector39:
     push 0
     push 39
+    jmp interrupt
+
+sysint:
+    push 0
+    push 0x80
     jmp interrupt
 
 ; when handling the hardware interrupts,

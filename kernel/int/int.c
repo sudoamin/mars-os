@@ -1,4 +1,5 @@
-#include "../../include/print.h"
+#include "../console/print.h"
+#include "../syscall.h"
 #include "idt.h"
 
 // int_handler will be called when we jump from ring3 to ring0.
@@ -18,8 +19,13 @@ void int_handler(struct trap_frame *tf) {
       }
       break;
 
+    case 0x80:
+      // tf to reference the data in the user stack
+      syscall(tf);
+      break;
+
     default:
-      printf("[Error %d at ring %d] %d:%x %x", tf->trapno, (tf->cs & 3),
+      printk("[Error %d at ring %d] %d:%x %x", tf->trapno, (tf->cs & 3),
              tf->errorcode, read_cr2(), tf->rip);
       while (1) {
       }

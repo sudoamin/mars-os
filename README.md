@@ -19,3 +19,4 @@ make && make run && make clean
 8. Network    
 9. Refactoring kernel/proc
 10. Write a loader to loading larger kernels and using the ATA
+11. Append the ps1 to end of mars.img and load it at 0x20000

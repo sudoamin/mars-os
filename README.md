@@ -9,7 +9,7 @@ make && make run && make clean
 ```
 
 # TODO
-1. Move kernel to 0x9000 ✓
+1. Removed
 2. Removed
 3. Update Makefile   
 4. Write Documents

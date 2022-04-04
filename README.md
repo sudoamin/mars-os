@@ -17,9 +17,9 @@ make && make run && make clean
     - Kernel space ✓
     - User space ✓
     - Paging ✓
-    - malloc, free
+    - Heap(malloc, free)
 6. Process managment
-     - Scheduling
+     - Scheduler
      - Wait/Exit
      - Sleep
      - Fork/Exec

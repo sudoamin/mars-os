@@ -15,7 +15,15 @@ make && make run && make clean
 4. Write Documents
 5. Memory management ✓
 6. Process management
+     - scheduling
+     - wait/exit
+     - sleep
+     - fork/exec
+     - system calls
 7. Filesystem
+     - ATA
+     - FAT16
+     - FD
 8. Network    
 9. Refactoring kernel/proc
 10. Write a loader to loading larger kernels and using the ATA

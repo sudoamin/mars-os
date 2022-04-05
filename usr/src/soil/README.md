@@ -1,27 +1,36 @@
 # The Soil Language
-Soil is an interpreter language for console of the MarsOS.    
-root@DIR:
+Soil is an interpreter language for the MarsOS.    
 
-Variables:
+***Global Variables***    
 DIR,
 ARGS
 
-syntax:    
+***Syntax***    
 include "PATH"    
 struct login {    
-    str username,    
-    str password,    
+  &emsp;  str username,    
+  &emsp;  str password,    
 }    
-str name = 'amin'    
-if (name != 'amin) {    
-        printf("name is: $name")    
+str name = 'soil'    
+if (name != 'soil) {    
+    &emsp;    printf("name is: $name")    
 }    
 null func_name(str p) {    
-    return null    
+ &emsp;   return null    
 }    
     
-ext: *.se    
+***File Extension***    
+*.se    
     
-commands:    
+***Commands***    
 soil -s MAIN_FILE_NAME    
 --source    
+
+***these programs will be written in Soil for MarsOS***
+1. proc
+2. mem
+3. fs
+4. net
+5. init
+6. usr
+6. soil

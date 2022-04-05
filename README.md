@@ -34,6 +34,6 @@ make && make run && make clean
 
 
 # Development notes
-For now maximum size of MarsOS can be 100KB.
-This should be an unikernel?
-Its better cantact me befor starting development if you need help.
+For now maximum size of MarsOS can be 100KB.    
+This should be an unikernel?    
+Its better cantact me befor starting development if you need help.    

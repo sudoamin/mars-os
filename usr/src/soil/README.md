@@ -1,5 +1,5 @@
 # The Soil Language
-Soil is an interpreter language for the MarsOS.    
+Soil is an interpreted language for the MarsOS.    
 
 ***Global Variables***    
 DIR,

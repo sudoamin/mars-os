@@ -9,7 +9,7 @@ make && make run && make clean
 ```
 
 # TODO
-1. Removed
+1. Should I make a programming language and rewrite this OS ?
 2. Removed
 3. Update Makefile   
 4. Write Documents
@@ -31,3 +31,9 @@ make && make run && make clean
 10. Write a loader to load larger kernels by the ATA
 11. Append the ps1 to end of mars.img and load it at 0x20000
 12. Complete console and Add a shell (named soil)
+
+
+# Development notes
+For now maximum size of MarsOS can be 100KB.
+This should be an unikernel?
+Its better cantact me befor starting development if you need help.

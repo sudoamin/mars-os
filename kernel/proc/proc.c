@@ -68,8 +68,7 @@ static void set_process_entry(struct proc *proc) {
   // create a new uvm
   // (uint64_t)main is the start address of program
   // and then the size of program
-  // 5120 is 10 sectors
-  ASSERT(setup_uvm(proc->pml4, (uint64_t)P2V(0x20000), 5120));
+  ASSERT(setup_uvm(proc->pml4, (uint64_t)P2V(0x20000), PAGE_SIZE));
 }
 
 // init_process finds an unused process in the process table

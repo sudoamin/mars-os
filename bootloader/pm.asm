@@ -1,5 +1,3 @@
-%include "bootloader/longmode.asm"
-
 [BITS 32]
 
 ; in protected mode and long mode we can not use the BIOS functions
@@ -11,6 +9,17 @@ protected_mode:
       mov es, ax
       mov ss, ax
       mov esp, 0x7c00 ; the stack pointer in protected mode
+
+      ; laod kernel at 0x9000
+      mov eax, 8 ; from sector x
+      mov ecx, 100 ; sectors to read
+      mov edi, 0x9000 ; the address
+      call ata_lba_read
+
+      mov eax, 100
+      mov ecx, 10
+      mov edi, 0x20000
+      call ata_lba_read
 
       ; enable the A20 line
       ; https://wiki.osdev.org/A20_Line
@@ -111,3 +120,11 @@ GDT32_LEN: equ $ - GDT32
 GDT32_PTR:
       dw GDT32_LEN - 1
       dd GDT32
+
+IDT32_PTR:
+      dw 0
+      dw 0
+
+%include "bootloader/ata.asm"
+; 64-bit
+%include "bootloader/longmode.asm"

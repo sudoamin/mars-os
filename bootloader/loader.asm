@@ -1,5 +1,5 @@
 [BITS 16]
-[ORG 0x7c00]
+[ORG 0x7e00]
 
 jmp init
 
@@ -45,5 +45,4 @@ MSG_WELCOME: db "MarsOS is booting...", 0ah, 0dh, 0
 
 %include "bootloader/pm.asm"
 
-times 510-($-$$) db 0
-dw 0xaa55
+times 4096-($-$$) db 0

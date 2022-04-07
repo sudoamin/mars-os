@@ -18,8 +18,8 @@ static void init_free_region(uint64_t v, uint64_t e);
 void init_mem(void) {
   // E820 structure is initialized in bootloader/mem.asm
   // load e820 structures
-  int32_t count = *(int32_t *)0x7e00;
-  struct E820 *mem_map = (struct E820 *)0x7e08;
+  int32_t count = *(int32_t *)0x8e00;
+  struct E820 *mem_map = (struct E820 *)0x8e08;
 
   ASSERT(count <= 50);
 

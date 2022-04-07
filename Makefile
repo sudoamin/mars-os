@@ -2,10 +2,13 @@ all: image
 
 fast: image run clean
 
-boot.bin:
-	nasm -f bin bootloader/bootloader.asm -o build/boot.bin
+.PHONY: bootloader kernel
 
-kernel.bin: lib.a
+bootloader:
+	nasm -f bin bootloader/boot.asm -o build/boot.bin
+	nasm -f bin bootloader/loader.asm -o build/loader.bin
+
+kernel: lib.a
 	nasm -f elf64 kernel/int/idt.asm -o build/idt.s.o
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/int/idt.c -o build/idt.o
 	gcc -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone -c kernel/int/int.c -o build/int.o
@@ -47,9 +50,11 @@ ps1: image
 ps1_clean: clean
 	rm -rf usr/src/ps1/build/*
 
-image: boot.bin kernel.bin
+image: bootloader kernel
 	dd if=build/boot.bin of=build/mars.img bs=512 count=1 conv=notrunc
-	dd if=build/kernel.bin of=build/mars.img bs=512 count=100 seek=1 conv=notrunc
+	dd if=build/loader.bin of=build/mars.img bs=512 count=10 seek=1 conv=notrunc
+	
+	dd if=build/kernel.bin of=build/mars.img bs=512 count=100 seek=8 conv=notrunc
 	dd if=/dev/zero bs=512 count=100 >> build/mars.img 
 
 run:

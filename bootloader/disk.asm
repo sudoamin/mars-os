@@ -8,7 +8,7 @@ load_kernel:
       mov ah, 2 ; Read sector command
       mov al, 100 ; x sector to read
       mov ch, 0 ; Cylinder low eight bits
-      mov cl, 2 ; Read sector x
+      mov cl, 9 ; Read sector x
       mov dh, 0 ; head number
       mov bx, 0x9000
       int 0x13

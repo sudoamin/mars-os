@@ -12,15 +12,15 @@ get_mem_info:
       mov eax, 0xe820
       mov edx, 0x534d4150
       mov ecx, 20
-      mov dword[0x7e00], 0
-      mov edi, 0x7e08
+      mov dword[0x8e00], 0
+      mov edi, 0x8e08
       xor ebx, ebx
       int 0x15
       jc mem_info_failed ; service e820 is not available
 
 loop_mem_info:
-      add edi, 20 ; 0x7e08 + 20 to get next memory block (each block is 20 bytes)
-      inc dword[0x7e00]
+      add edi, 20 ; 0x8e08 + 20 to get next memory block (each block is 20 bytes)
+      inc dword[0x8e00]
       test ebx, ebx
       jz mem_info_done
 

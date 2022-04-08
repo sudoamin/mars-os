@@ -222,7 +222,7 @@ PML4 setup_kvm(void) {
     // and not accessible by user applications
     if (!map_pages(pml4, KERNEL_BASE, mem_end, V2P(KERNEL_BASE),
                    PTE_P | PTE_W)) {
-      free_uvm(pml4);
+      free_vm(pml4);
       pml4 = 0;
     }
   }
@@ -324,7 +324,7 @@ static void free_pml4t(PML4 pml4) { kfree(pml4); }
 // and page directory pointer tables.
 // we do not free the kernel page
 // because the kernel page is shared among all the vms
-void free_uvm(PML4 pml4) {
+void free_vm(PML4 pml4) {
   free_pages(pml4, 0x400000, 0x400000 + PAGE_SIZE);
   free_pd(pml4);
   free_pdp(pml4);
@@ -356,7 +356,7 @@ bool setup_uvm(PML4 pml4, paddr_t program, int size) {
       memcpy(page, (void *)program, size);
     } else {
       kfree((vaddr_t)page);
-      free_uvm(pml4);
+      free_vm(pml4);
     }
   }
 

@@ -42,6 +42,7 @@ static void set_process_entry(struct proc *proc) {
 
   // allocate a page for the kernel stack
   // so each ps has its own kernel stack
+  // this page has U=0 by default. take a look at mem/setup_kvm
   proc->kstack = (uint64_t)kalloc();
   ASSERT(proc->kstack != 0);
   memset((void *)proc->kstack, 0, PAGE_SIZE);
@@ -66,7 +67,6 @@ static void set_process_entry(struct proc *proc) {
   proc->pml4 = setup_kvm();
   ASSERT(proc->pml4 != 0);
   // create a new uvm
-  // (uint64_t)main is the start address of program
   // and then the size of program
   ASSERT(setup_uvm(proc->pml4, (uint64_t)P2V(0x20000), PAGE_SIZE));
 }

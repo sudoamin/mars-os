@@ -22,7 +22,7 @@ void kmain(void) {
   init_proc();
   launch();
 
-  //  printf("total free memory: %uMB \n", get_free_mem() / 1024 / 1024);
+  //  printk("total free memory: %uMB \n", get_free_mem() / 1024 / 1024);
 
   // ASSERT(0);
 }

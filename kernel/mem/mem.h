@@ -57,7 +57,7 @@ void kfree(vaddr_t addr);
 
 uint64_t get_free_mem(void);
 
-void free_uvm(PML4 pml4);
+void free_vm(PML4 pml4);
 
 PML4 setup_kvm(void);
 bool setup_uvm(PML4 pml4, paddr_t program, int size);

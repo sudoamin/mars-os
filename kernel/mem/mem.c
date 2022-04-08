@@ -1,8 +1,8 @@
 #include "mem.h"
 
 #include "../../include/debug.h"
-#include "../console/print.h"
 #include "../../include/string.h"
+#include "../console/print.h"
 #include "stdbool.h"
 #include "stddef.h"
 
@@ -11,9 +11,9 @@ static struct page page;
 // end of kernel, defined in linker.ld
 extern char end;
 static uint64_t total_free_mem = 0;
-uint64_t mem_end;
+vaddr_t mem_end;
 
-static void init_free_region(uint64_t v, uint64_t e);
+static void init_free_region(vaddr_t s, vaddr_t e);
 
 void init_mem(void) {
   // E820 structure is initialized in bootloader/mem.asm
@@ -27,8 +27,8 @@ void init_mem(void) {
     if (mem_map[i].type == 1) {  // it means this region is free
       total_free_mem += mem_map[i].length;
 
-      uint64_t vstart = P2V(mem_map[i].address);
-      uint64_t vend = vstart + mem_map[i].length;
+      vaddr_t vstart = P2V(mem_map[i].address);
+      vaddr_t vend = vstart + mem_map[i].length;
 
       // if start of memory region is larger than end of kernel,
       // this is the free memory we want and do init.
@@ -38,25 +38,25 @@ void init_mem(void) {
       // end of kernel to end of region
       // otherwise we ignore the region because it is within the kernel
       // the end is a symbol instead of a variable (&end get address of symbol)
-      if (vstart > (uint64_t)&end) {
+      if (vstart > (vaddr_t)&end) {
         init_free_region(vstart, vend);
-      } else if (vend > (uint64_t)&end) {
-        init_free_region((uint64_t)&end, vend);
+      } else if (vend > (vaddr_t)&end) {
+        init_free_region((vaddr_t)&end, vend);
       }
     }
     // printk("%x  %uKB  %u\n", mem_map[i].address, mem_map[i].length / 1024,
     //         (uint64_t)mem_map[i].type);
   }
   // because the page linked list is reverse
-  mem_end = (uint64_t)page.next + PAGE_SIZE;
+  mem_end = (vaddr_t)page.next + PAGE_SIZE;
 }
 
 // init_free_region divids the region into 2MB pages and collect the pages
-static void init_free_region(uint64_t v, uint64_t e) {
+static void init_free_region(vaddr_t s, vaddr_t e) {
   // aligning the address to next 2MB boundary
   // then compare this page with end of the region
   // if it is within the region, call kfree
-  for (uint64_t start = PA_UP(v); start + PAGE_SIZE <= e; start += PAGE_SIZE) {
+  for (vaddr_t start = PA_UP(s); start + PAGE_SIZE <= e; start += PAGE_SIZE) {
     // 0xffff800040000000 is 1G above the base of kernel
     // if the page we are about to initialize is beyond the first 1G of RAM,
     // call kfree Note: we only use the first 1G of RAM
@@ -66,11 +66,11 @@ static void init_free_region(uint64_t v, uint64_t e) {
   }
 }
 
-void kfree(uint64_t v) {
+void kfree(vaddr_t v) {
   // make sure the virtual address is page aligned
   ASSERT(v % PAGE_SIZE == 0);
   // make sure the virtual address is not within the kernel
-  ASSERT(v >= (uint64_t)&end);
+  ASSERT(v >= (vaddr_t)&end);
   // checks 1G memory limits
   ASSERT(v + PAGE_SIZE <= 0xffff800040000000);
 
@@ -84,9 +84,9 @@ void *kalloc(void) {
   struct page *page_address = page.next;
 
   if (page_address != NULL) {
-    ASSERT((uint64_t)page_address % PAGE_SIZE == 0);
-    ASSERT((uint64_t)page_address >= (uint64_t)&end);
-    ASSERT((uint64_t)page_address + PAGE_SIZE <= 0xffff800040000000);
+    ASSERT((vaddr_t)page_address % PAGE_SIZE == 0);
+    ASSERT((vaddr_t)page_address >= (vaddr_t)&end);
+    ASSERT((vaddr_t)page_address + PAGE_SIZE <= 0xffff800040000000);
 
     page.next = page_address->next;
   }
@@ -97,50 +97,52 @@ void *kalloc(void) {
 // get_free_mem returns total free memory in bytes
 uint64_t get_free_mem(void) { return total_free_mem; }
 
-// find_pml4t_entry finds the entry according to the virtual address
-// the entry points to page directory pointer table
-static PDPTR find_pml4t_entry(uint64_t map, uint64_t v, int alloc,
-                              uint32_t attribute) {
-  PDPTR *map_entry = (PDPTR *)map;
-  PDPTR pdptr = NULL;
-  unsigned int index = (v >> 39) & 0x1FF;
+// find_pml4t_entry finds the PDP
+// the address of PDP is stored in the entry
+// the index of the entry are stored in the addr from bits 39
+static PDP find_pml4t_entry(PML4 pml4, vaddr_t addr, int alloc,
+                            uint32_t attribute) {
+  // entry without attributes
+  vaddr_t entry = 0;
+  // index is located from the bits 39 of the virtual address and
+  // is also 9 bits in total
+  unsigned int index = (addr >> 39) & 0x1FF;
 
-  // if the present bit is set, copy the address to pdpt
-  if ((uint64_t)map_entry[index] & PTE_P) {
-    pdptr = (PDPTR)P2V(PDE_ADDR(map_entry[index]));
+  // if the present bit is set, copy the address to pdp
+  if (pml4[index] & PTE_P) {
+    // PDE_ADDR clears the attributes
+    entry = P2V(PDE_ADDR(pml4[index]));
   } else if (alloc == 1) {
-    pdptr = (PDPTR)kalloc();
-    if (pdptr != NULL) {
-      memset(pdptr, 0, PAGE_SIZE);
-      map_entry[index] = (PDPTR)(V2P(pdptr) | attribute);
+    // define new entry
+    vaddr_t pdp = kalloc();
+    if (pdp != NULL) {
+      memset((void *)pdp, 0, PAGE_SIZE);
+      // from bit 12 to .. is PDP table addres
+      // bits 0=P 1=W 2=U for attributes
+      pml4[index] = V2P(pdp) | attribute;
+      entry = pdp;
     }
   }
 
-  return pdptr;
+  return (PDP)entry;
 }
 
-// find_pdpt_entry finds the entry in the directory pointer table
-// which points to the page directory table.
+// find_pdpt_entry finds the PD
 // alloc indicating whether or not we will create a page if it does exist
-static PD find_pdpt_entry(uint64_t pml4, uint64_t vaddr, int alloc,
-                          uint32_t attribute) {
-  PDPTR pdptr = NULL;
+static PD find_pdp_entry(PDP pdp, vaddr_t addr, int alloc, uint32_t attribute) {
   PD pd = NULL;
   // index is located from the bits 30 of the virtual address and
   // is also 9 bits in total
-  unsigned int index = (vaddr >> 30) & 0x1FF;
-
-  pdptr = find_pml4t_entry(pml4, vaddr, alloc, attribute);
-  if (pdptr == NULL) return NULL;
+  unsigned int index = (addr >> 30) & 0x1FF;
 
   // find entry using index
   // if the present bit of attributes is 1, then it means that
   // the value in the entry points to next level table which is page directory
   // table
-  if ((uint64_t)pdptr[index] & PTE_P) {
+  if ((uint64_t)pdp[index] & PTE_P) {
     // clear attribute bits to get address
     // convert physical address to virtual
-    pd = (PD)P2V(PDE_ADDR(pdptr[index]));
+    pd = (PD)P2V(PDE_ADDR(pdp[index]));
   }
   // if the present bit is not set, then it is an unused entry
   // if alloc is 1, allocate a new page and set the entry to
@@ -149,55 +151,52 @@ static PD find_pdpt_entry(uint64_t pml4, uint64_t vaddr, int alloc,
     pd = (PD)kalloc();
     if (pd != NULL) {
       memset(pd, 0, PAGE_SIZE);
-      pdptr[index] = (PD)(V2P(pd) | attribute);
+      pdp[index] = (PD)(V2P(pd) | attribute);
     }
   }
 
   return pd;
 }
 
-// in the page directory table, we can set the corresponding entry to
-// map the addresses to the physical page
 // map_pages mapps the address to physical page
-bool map_pages(uint64_t map, uint64_t v, uint64_t e, uint64_t pa,
+// page is the base physical addr of the 2M page
+bool map_pages(PML4 pml4, vaddr_t s, vaddr_t e, paddr_t page,
                uint32_t attribute) {
   // aligned virtual addresses
-  uint64_t vstart = PA_DOWN(v);
-  uint64_t vend = PA_UP(e);
-
-  PD pd = NULL;
-  // locate the specific entry in the PD
-  unsigned int index;
+  vaddr_t vstart = PA_DOWN(s);
+  vaddr_t vend = PA_UP(e);
 
   // checks start and end of region
-  ASSERT(v < e);
+  ASSERT(s < e);
   // make sure the physical address we want to map into is page aligned
-  ASSERT(pa % PAGE_SIZE == 0);
+  ASSERT(page % PAGE_SIZE == 0);
   // checks if end of physical address is outside the range of 1G memory
-  ASSERT(pa + vend - vstart <= 1024 * 1024 * 1024);
+  ASSERT(page + vend - vstart <= 1024 * 1024 * 1024);
 
   do {
-    // find the page directory pointer table entry which
-    // points to page directory table
-    pd = find_pdpt_entry(map, vstart, 1, attribute);
-    if (pd == NULL) {
-      return false;
-    }
+    PDP pdp = find_pml4t_entry(pml4, vstart, 1, attribute);
+    if (pdp == NULL) return false;
+
+    PD pd = find_pdp_entry(pdp, vstart, 1, attribute);
+    if (pd == NULL) return false;
+
+    // set pd entry which points to the 2M page
 
     // index value is 9 bits in total starting from bits 21
     // so we shift right 21 bits and clear other bits excep the lower 9 bits of
     // the result
-    index = (vstart >> 21) & 0x1FF;
+    unsigned int index = (vstart >> 21) & 0x1FF;
     // if the present bit is set, it means that we
     // remap to the used page
     ASSERT(((uint64_t)pd[index] & PTE_P) == 0);
 
     // set entry
-    pd[index] = (PDE)(pa | attribute | PTE_ENTRY);
+    // PTE_ENTRY indicates that this is 2M page
+    pd[index] = page | attribute | PTE_ENTRY;
 
     // move to the next page
     vstart += PAGE_SIZE;
-    pa += PAGE_SIZE;
+    page += PAGE_SIZE;
 
     // if the virtual address is still within the memory region,
     // we continue the process until we reach end of region
@@ -207,15 +206,15 @@ bool map_pages(uint64_t map, uint64_t v, uint64_t e, uint64_t pa,
 }
 
 // switch_vm loads cr3 register with new PML4 table to make the mapping
-void switch_vm(uint64_t map) { load_cr3(V2P(map)); }
+void switch_vm(PML4 pml4) { load_cr3(V2P(pml4)); }
 
 // each process has its own address space,
 // any changes in one address space will not affect other address spaces
 // so we can setup kernel space and user space for each process
 
 // setup_kvm remaps the kernel using 2MB pages and returns the new PML4 table
-uint64_t setup_kvm(void) {
-  uint64_t pml4 = (uint64_t)kalloc();
+PML4 setup_kvm(void) {
+  PML4 pml4 = (vaddr_t)kalloc();
   if (pml4 != 0) {
     memset((void *)pml4, 0, PAGE_SIZE);
     // KERNEL_BASE is start of memory region
@@ -223,7 +222,7 @@ uint64_t setup_kvm(void) {
     // and not accessible by user applications
     if (!map_pages(pml4, KERNEL_BASE, mem_end, V2P(KERNEL_BASE),
                    PTE_P | PTE_W)) {
-      free_vm(pml4);
+      free_uvm(pml4);
       pml4 = 0;
     }
   }
@@ -232,7 +231,7 @@ uint64_t setup_kvm(void) {
 }
 
 void init_kvm(void) {
-  uint64_t pml4 = setup_kvm();
+  PML4 pml4 = setup_kvm();
   ASSERT(pml4 != 0);
   switch_vm(pml4);
 }
@@ -245,27 +244,25 @@ void init_kvm(void) {
 // directory tables. so we need to loop through each of the tables.
 
 // free_pages is like reverse process of mapping pages.
-void free_pages(uint64_t map, uint64_t vstart, uint64_t vend) {
-  // index is used to locate entry in the page directory table
-  unsigned int index;
-
-  // vstart and vend have to be aligned
-  ASSERT(vstart % PAGE_SIZE == 0);
-  ASSERT(vend % PAGE_SIZE == 0);
+void free_pages(PML4 pml4, vaddr_t start, vaddr_t end) {
+  // start and end have to be aligned
+  ASSERT(start % PAGE_SIZE == 0);
+  ASSERT(end % PAGE_SIZE == 0);
 
   do {
     // find the page directory table
     // alloc is 0 which means
-    // find_pdpt_entry returns null if the entry does not exist
+    // find_pdp_entry returns null if the entry does not exist
     // because we want to free the existing page
-    PD pd = find_pdpt_entry(map, vstart, 0, 0);
+    PD pd = find_pdp_entry(pml4, start, 0, 0);
 
     if (pd != NULL) {
-      index = (vstart >> 21) & 0x1FF;
+      // index is used to locate entry in the page directory table
+      unsigned int index = (start >> 21) & 0x1FF;
       // find corresponding entry and check present bit
       if (pd[index] & PTE_P) {
         // the lower 21 bits should be cleared before using the address.
-        // PTE_ADDR
+        // so PTE_ADDR clears the lower 21 bits
         kfree(P2V(PTE_ADDR(pd[index])));
         // the entry now is unused
         pd[index] = 0;
@@ -273,16 +270,14 @@ void free_pages(uint64_t map, uint64_t vstart, uint64_t vend) {
     }
 
     // move to next page
-    vstart += PAGE_SIZE;
+    start += PAGE_SIZE;
     // continue process until we reach end of memory region
-  } while (vstart + PAGE_SIZE <= vend);
+  } while (start + PAGE_SIZE <= end);
 }
 
 // loop through the PML4 table and page directory pinter tables
 // to find page directory tables.
-static void free_pdt(uint64_t map) {
-  PDPTR *pml4 = (PDPTR *)map;
-
+static void free_pd(PML4 pml4) {
   // since each entry in PML4 table points to page directory table,
   // we could have a total of 512 PDP tables
 
@@ -308,9 +303,7 @@ static void free_pdt(uint64_t map) {
 }
 
 // free_pdpt is used to free page directory pointer tables
-static void free_pdpt(uint64_t map) {
-  PDPTR *pml4 = (PDPTR *)map;
-
+static void free_pdp(PML4 pml4) {
   for (int i = 0; i < 512; i++) {
     // if the entry is used, it frees the page pointed to by the entry
     // which is page directory pointer table
@@ -321,7 +314,7 @@ static void free_pdpt(uint64_t map) {
   }
 }
 
-static void free_pml4t(uint64_t map) { kfree(map); }
+static void free_pml4t(PML4 pml4) { kfree(pml4); }
 
 // to free vm we free the physical pages in the user space as
 // well as page tables.
@@ -331,40 +324,39 @@ static void free_pml4t(uint64_t map) { kfree(map); }
 // and page directory pointer tables.
 // we do not free the kernel page
 // because the kernel page is shared among all the vms
-void free_vm(uint64_t map) {
-  // free one page
-  free_pages(map, 0x400000, 0x400000 + PAGE_SIZE);
-  free_pdt(map);
-  free_pdpt(map);
-  free_pml4t(map);
+void free_uvm(PML4 pml4) {
+  free_pages(pml4, 0x400000, 0x400000 + PAGE_SIZE);
+  free_pd(pml4);
+  free_pdp(pml4);
+  free_pml4t(pml4);
 }
 
 // we map only one page for the user programs which means
 // the code, data and stack of the programs are located in the same 2M page.
 
-// start is the location of the program
-// size is the size of the data we will copy
-bool setup_uvm(uint64_t pml4, uint64_t data, int size) {
+// size is the size of the program we will copy
+bool setup_uvm(PML4 pml4, paddr_t program, int size) {
   // allocate a page which is used to
-  // store the code and data of the program
-  void *p = kalloc();
+  // store the code, data and stack of the program
+  void *page = kalloc();
+
   bool status = false;
 
-  if (p != NULL) {
+  if (page != NULL) {
     // it could include some random values
-    memset(p, 0, PAGE_SIZE);
-    // map the page using map_pages
+    memset(page, 0, PAGE_SIZE);
+    // map the virtaul address (0x400000) to the physical 2M page
     // because we implement only one page for user application,
     // we add page size to the base address
     // and next one is the base of physical page we want to map into
     // which is the page we allocate
-    status = map_pages(pml4, 0x400000, 0x400000 + PAGE_SIZE, V2P(p),
+    status = map_pages(pml4, 0x400000, 0x400000 + PAGE_SIZE, V2P(page),
                        PTE_P | PTE_W | PTE_U);
     if (status == true) {
-      memcpy(p, (void *)data, size);
+      memcpy(page, (void *)program, size);
     } else {
-      kfree((uint64_t)p);
-      free_vm(pml4);
+      kfree((vaddr_t)page);
+      free_uvm(pml4);
     }
   }
 

@@ -16,11 +16,12 @@ struct page {
   struct page *next;
 };
 
-// points to page directory entry
-typedef uint64_t PDE;
-typedef PDE *PD;
-// points to page directory
-typedef PD *PDPTR;
+typedef uint64_t vaddr_t;
+typedef uint64_t paddr_t;
+
+typedef uint64_t *PML4;
+typedef uint64_t *PDP;
+typedef uint64_t *PD;
 
 // the attributes of table entries
 #define PTE_P 1
@@ -52,18 +53,19 @@ void init_mem(void);
 void init_kvm(void);
 
 void *kalloc(void);
-void kfree(uint64_t v);
-uint64_t get_free_mem(void);
-bool map_pages(uint64_t map, uint64_t v, uint64_t e, uint64_t pa,
-               uint32_t attribute);
-void free_vm(uint64_t map);
+void kfree(vaddr_t addr);
 
-void free_pages(uint64_t map, uint64_t v, uint64_t e);
-uint64_t setup_kvm(void);
-bool setup_uvm(uint64_t pml4, uint64_t data, int size);
-void switch_vm(uint64_t map);
+uint64_t get_free_mem(void);
+
+void free_uvm(PML4 pml4);
+
+PML4 setup_kvm(void);
+bool setup_uvm(PML4 pml4, paddr_t program, int size);
+bool map_pages(PML4 pml4, vaddr_t v, vaddr_t e, paddr_t page,
+               uint32_t attribute);
+void switch_vm(PML4 pml4);
 
 // mem.asm
-void load_cr3(uint64_t map);
+void load_cr3(PML4 pml4);
 
 #endif

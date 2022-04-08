@@ -134,3 +134,35 @@ void yield(void) {
   append_list_tail(list, (struct List *)process);
   schedule();
 }
+
+void sleep(int wait) {
+  struct ProcessControl *process_control;
+  struct proc *process;
+
+  process_control = get_pc();
+  process = process_control->current_process;
+  process->state = PROC_SLEEP;
+  process->wait = wait;
+
+  append_list_tail(&process_control->wait_list, (struct List *)process);
+  schedule();
+}
+
+void wake_up(int wait) {
+  struct ProcessControl *process_control;
+  struct proc *process;
+  struct HeadList *ready_list;
+  struct HeadList *wait_list;
+
+  process_control = get_pc();
+  ready_list = &process_control->ready_list;
+  wait_list = &process_control->wait_list;
+  process = (struct proc *)remove_list(wait_list, wait);
+  // generally, we could have multiple processes waiting on the same object
+  // find all the waiting processes in the list
+  while (process != NULL) {
+    process->state = PROC_READY;
+    append_list_tail(ready_list, (struct List *)process);
+    process = (struct proc *)remove_list(wait_list, wait);
+  }
+}

@@ -29,6 +29,8 @@ struct idt_ptr {
 
 void init_idt(void);
 
+uint64_t get_ticks(void);
+
 // implemented in idt.asm
 void load_idt(struct idt_ptr *ptr);
 void eoi(void);

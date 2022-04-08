@@ -25,7 +25,7 @@ init:
 
 main:
       call kinit
-      sti
+      ; sti
       call kmain
 
 end:

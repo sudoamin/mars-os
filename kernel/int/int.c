@@ -3,6 +3,15 @@
 #include "../syscall/syscall.h"
 #include "idt.h"
 
+static uint64_t ticks;
+
+uint64_t get_ticks(void) { return ticks; }
+
+static void timer_handler(void) {
+  ticks++;
+  wake_up(-1);
+}
+
 // int_handler will be called when we jump from ring3 to ring0.
 // when an interrupt or exception occours
 void int_handler(struct trap_frame *tf) {
@@ -10,6 +19,7 @@ void int_handler(struct trap_frame *tf) {
 
   switch (tf->trapno) {
     case 32:
+      timer_handler();
       eoi();
       break;
 

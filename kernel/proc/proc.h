@@ -20,6 +20,8 @@ struct proc {
   // saves the rsp value when switching process
   uint64_t context;
   int pid;
+  // why the proc is put into sleep and how to wake it up
+  int wait;
   int state;
   uint64_t pml4;
   uint64_t kstack;
@@ -47,6 +49,7 @@ struct TSS {
 struct ProcessControl {
 	struct Process *current_process;
 	struct HeadList ready_list;
+	struct HeadList wait_list;
 };
 
 #define STACK_SIZE (2*1024*1024)
@@ -56,11 +59,14 @@ struct ProcessControl {
 #define PROC_INIT 1
 #define PROC_RUNNING 2
 #define PROC_READY 3
+#define PROC_SLEEP 4
 
 void init_proc(void);
 void launch(void);
 void pstart(struct trap_frame *tf);
 void yield(void);
 void swap(uint64_t *prev, uint64_t next);
+void sleep(int wait);
+void wake_up(int wait);
 
 #endif

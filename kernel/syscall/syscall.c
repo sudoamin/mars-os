@@ -17,7 +17,25 @@ static int sys_write(int64_t *argptr) {
   return (int)argptr[1];
 }
 
-void init_syscall(void) { system_calls[0] = sys_write; }
+static int sys_sleep(int64_t *argptr) {
+  uint64_t old_ticks;
+  uint64_t ticks;
+  uint64_t sleep_ticks = argptr[0];
+
+  ticks = get_ticks();
+  old_ticks = ticks;
+
+  while (ticks - old_ticks < sleep_ticks) {
+    sleep(-1);
+    ticks = get_ticks();
+  }
+  return 0;
+}
+
+void init_syscall(void) {
+  system_calls[0] = sys_write;
+  system_calls[1] = sys_sleep;
+}
 
 void syscall(struct trap_frame *tf) {
   // the index number of syscall
@@ -27,7 +45,7 @@ void syscall(struct trap_frame *tf) {
   int64_t *argptr = (int64_t *)tf->rsi;
 
   // TODO, since we only have 1 syscall then i != 0
-  if (param_count < 0 || i != 0) {
+  if (param_count < 0) {
     // the error code
     tf->rax = -1;
     return;

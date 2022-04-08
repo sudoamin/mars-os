@@ -5,5 +5,7 @@
 
 int syscall_write(char* buffer, int buffer_size);
 void syscall_sleep(uint64_t ticks);
+void syscall_exit(void);
+void syscall_wait(void);
 
 #endif

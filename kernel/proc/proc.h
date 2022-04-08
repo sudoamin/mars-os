@@ -5,12 +5,12 @@
 #include "stdbool.h"
 
 struct List {
-	struct List *next;
+  struct List *next;
 };
 
-struct HeadList{
-	struct List* next;
-	struct List* tail;
+struct HeadList {
+  struct List *next;
+  struct List *tail;
 };
 
 bool is_list_empty(struct HeadList *list);
@@ -47,12 +47,13 @@ struct TSS {
 } __attribute__((packed));
 
 struct ProcessControl {
-	struct Process *current_process;
-	struct HeadList ready_list;
-	struct HeadList wait_list;
+  struct Process *current_process;
+  struct HeadList ready_list;
+  struct HeadList wait_list;
+  struct HeadList kill_list;
 };
 
-#define STACK_SIZE (2*1024*1024)
+#define STACK_SIZE (2 * 1024 * 1024)
 #define NUM_PROC 10
 
 #define PROC_UNUSED 0
@@ -60,6 +61,7 @@ struct ProcessControl {
 #define PROC_RUNNING 2
 #define PROC_READY 3
 #define PROC_SLEEP 4
+#define PROC_KILLED 5
 
 void init_proc(void);
 void launch(void);
@@ -68,5 +70,7 @@ void yield(void);
 void swap(uint64_t *prev, uint64_t next);
 void sleep(int wait);
 void wake_up(int wait);
+void exit(void);
+void wait(void);
 
 #endif

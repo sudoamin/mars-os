@@ -2,6 +2,8 @@ section .text
 
 global syscall_write
 global syscall_sleep
+global syscall_exit
+global syscall_wait
 
 syscall_write:
       ; allocate 16-byte space on the stack for the arguments
@@ -45,4 +47,21 @@ syscall_sleep:
 
     add rsp,8
     
+    ret
+
+    
+syscall_exit:
+    mov eax,2
+    mov rdi,0
+
+    int 0x80
+
+    ret
+
+syscall_wait:
+    mov eax,3
+    mov rdi,0
+
+    int 0x80
+
     ret

@@ -166,3 +166,41 @@ void wake_up(int wait) {
     process = (struct proc *)remove_list(wait_list, wait);
   }
 }
+
+void exit(void) {
+  struct ProcessControl *process_control;
+  struct proc *process;
+  struct HeadList *list;
+
+  process_control = get_pc();
+  process = process_control->current_process;
+  process->state = PROC_KILLED;
+
+  list = &process_control->kill_list;
+  append_list_tail(list, (struct List *)process);
+
+  wake_up(1);
+  schedule();
+}
+
+void wait(void) {
+  struct ProcessControl *process_control;
+  struct proc *process;
+  struct HeadList *list;
+
+  process_control = get_pc();
+  list = &process_control->kill_list;
+
+  while (1) {
+    if (!is_list_empty(list)) {
+      process = (struct proc *)remove_list_head(list);
+      ASSERT(process->state == PROC_KILLED);
+
+      kfree(process->kstack);
+      free_vm(process->pml4);
+      memset(process, 0, sizeof(struct proc));
+    } else {
+      sleep(1);
+    }
+  }
+}

@@ -32,9 +32,21 @@ static int sys_sleep(int64_t *argptr) {
   return 0;
 }
 
+static int sys_exit(int64_t *argptr) {
+  exit();
+  return 0;
+}
+
+static int sys_wait(int64_t *argptr) {
+  wait();
+  return 0;
+}
+
 void init_syscall(void) {
   system_calls[0] = sys_write;
   system_calls[1] = sys_sleep;
+  system_calls[2] = sys_exit;
+  system_calls[3] = sys_wait;
 }
 
 void syscall(struct trap_frame *tf) {
@@ -45,7 +57,7 @@ void syscall(struct trap_frame *tf) {
   int64_t *argptr = (int64_t *)tf->rsi;
 
   // TODO, since we only have 1 syscall then i != 0
-  if (param_count < 0) {
+  if (param_count < 0 || i > 3 || i < 0) {
     // the error code
     tf->rax = -1;
     return;

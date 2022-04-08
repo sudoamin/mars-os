@@ -36,6 +36,11 @@ void int_handler(struct trap_frame *tf) {
       break;
 
     default:
+      if ((tf->cs & 3) == 3) {
+        printk("\nException is %d\n", tf->trapno);
+        exit();
+        break;
+      }
       printk("[Error %d at ring %d] %d:%x %x", tf->trapno, (tf->cs & 3),
              tf->errorcode, read_cr2(), tf->rip);
       while (1) {

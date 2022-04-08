@@ -1,4 +1,5 @@
 #include "../console/print.h"
+#include "../proc/proc.h"
 #include "../syscall/syscall.h"
 #include "idt.h"
 
@@ -29,5 +30,9 @@ void int_handler(struct trap_frame *tf) {
              tf->errorcode, read_cr2(), tf->rip);
       while (1) {
       }
+  }
+
+  if (tf->trapno == 32) {
+    yield();
   }
 }

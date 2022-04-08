@@ -14,14 +14,12 @@ void kinit(void) {
   init_mem();
   init_kvm();
   init_syscall();
-}
-
-void kmain(void) {
-  printk("Welcome to MarsOS \n\n");
 
   init_proc();
   launch();
+}
 
+void kmain(void) {
   //  printk("total free memory: %uMB \n", get_free_mem() / 1024 / 1024);
 
   // ASSERT(0);

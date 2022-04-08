@@ -34,3 +34,4 @@ make && make run && make clean
 10. Write a loader to load larger kernels by the ATA in protected mode ✓
 11. Append the ps1 to end of mars.img and load it at 0x20000 ✓
 12. Complete console and Add a shell (named soil)
+13. Refactoring kernel/proc

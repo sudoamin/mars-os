@@ -20,7 +20,6 @@ init:
       ; we have almost 30 KiB free space below of 0x7c00
       ; so we can use it for the stack
       mov sp, 0x7c00
-      sti ; enables interrupts
 
       call clear_screen
       call load_loader

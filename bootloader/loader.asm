@@ -11,7 +11,6 @@ init:
 	mov ss, ax
       ; we have almost 30 KiB free space below of 0x7c00
       mov sp, 0x7c00
-      sti ; enables interrupts
 
       call clear_screen
       mov si, MSG_WELCOME

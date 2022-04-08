@@ -43,15 +43,22 @@ lib.a:
 	ar -rcs build/lib.a build/string.s.o build/syscall.s.o build/string.o build/debug.o \
 	build/console.o
 
-ps1: image
+ps: image
 	nasm -f elf64 usr/src/ps1/execute.asm -o usr/src/ps1/build/execute.s.o
 	${CC} ${C_FLAGS} -c usr/src/ps1/main.c -o usr/src/ps1/build/main.o
 	ld -nostdlib -Tusr/src/ps1/linker.ld -o usr/src/ps1/build/ps1 usr/src/ps1/build/main.o usr/src/ps1/build/execute.s.o build/lib.a
 	objcopy -O binary usr/src/ps1/build/ps1 usr/src/ps1/build/ps1.bin
 	dd if=usr/src/ps1/build/ps1.bin of=build/mars.img bs=512 count=10 seek=100 conv=notrunc
 
-ps1_clean: clean
+	nasm -f elf64 usr/src/soil/execute.asm -o usr/src/soil/build/execute.s.o
+	${CC} ${C_FLAGS} -c usr/src/soil/main.c -o usr/src/soil/build/main.o
+	ld -nostdlib -Tusr/src/soil/linker.ld -o usr/src/soil/build/soil usr/src/soil/build/main.o usr/src/soil/build/execute.s.o build/lib.a
+	objcopy -O binary usr/src/soil/build/soil usr/src/soil/build/soil.bin
+	dd if=usr/src/soil/build/soil.bin of=build/mars.img bs=512 count=10 seek=110 conv=notrunc
+
+ps_clean: clean
 	rm -rf usr/src/ps1/build/*
+	rm -rf usr/src/soil/build/*
 
 image: bootloader kernel
 	dd if=build/boot.bin of=build/mars.img bs=512 count=1 conv=notrunc

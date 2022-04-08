@@ -16,9 +16,16 @@ protected_mode:
       mov edi, 0x9000 ; the address
       call ata_lba_read
 
+      ; load program to memory
+
       mov eax, 100
       mov ecx, 10
       mov edi, 0x20000
+      call ata_lba_read
+
+      mov eax, 110
+      mov ecx, 10
+      mov edi, 0x30000
       call ata_lba_read
 
       ; enable the A20 line

@@ -34,6 +34,7 @@ void load_idt(struct idt_ptr *ptr);
 void eoi(void);
 unsigned char read_isr(void);
 uint64_t read_cr2(void);
+void int_return(void);
 
 struct trap_frame {
   int64_t r15;  // RSP  low address

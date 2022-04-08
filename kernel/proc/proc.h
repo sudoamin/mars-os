@@ -2,8 +2,23 @@
 #define _PS_H
 
 #include "../int/idt.h"
+#include "stdbool.h"
+
+struct List {
+	struct List *next;
+};
+
+struct HeadList{
+	struct List* next;
+	struct List* tail;
+};
+
+bool is_list_empty(struct HeadList *list);
 
 struct proc {
+  struct List *next;
+  // saves the rsp value when switching process
+  uint64_t context;
   int pid;
   int state;
   uint64_t pml4;
@@ -29,13 +44,23 @@ struct TSS {
   uint16_t iopb;
 } __attribute__((packed));
 
-#define STACK_SIZE (2 * 1024 * 1024)
+struct ProcessControl {
+	struct Process *current_process;
+	struct HeadList ready_list;
+};
+
+#define STACK_SIZE (2*1024*1024)
 #define NUM_PROC 10
+
 #define PROC_UNUSED 0
 #define PROC_INIT 1
+#define PROC_RUNNING 2
+#define PROC_READY 3
 
 void init_proc(void);
 void launch(void);
 void pstart(struct trap_frame *tf);
+void yield(void);
+void swap(uint64_t *prev, uint64_t next);
 
 #endif

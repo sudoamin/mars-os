@@ -29,9 +29,10 @@ global sysint
 global eoi
 global read_isr
 global read_cr2
-
+global int_return
 global load_idt
 global pstart
+global swap
 
 interrupt:
     push rax
@@ -55,9 +56,9 @@ interrupt:
 
     mov rdi, rsp
     call int_handler
-    ; and interrupt_return executes
+    ; and int_return executes
 
-interrupt_return:
+int_return:
     pop	r15
     pop	r14
     pop	r13
@@ -206,4 +207,30 @@ read_cr2:
 
 pstart:
     mov rsp, rdi
-    jmp interrupt_return
+    jmp int_return
+
+; changes the kernel stack pointer from one process to another
+; dont push all 15 general-purposed registers
+; because in system V amd64 calling convention, 
+; other registers are caller-saved registers
+swap:
+    push rbx
+    push rbp
+    push r12
+    push r13
+    push r14
+    push r15
+    
+    ; rdi is the address of context field in process
+    mov [rdi],rsp
+    ; rsi is the context value in the next process
+    mov rsp,rsi
+    
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbp
+    pop rbx
+    
+    ret

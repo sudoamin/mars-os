@@ -1,6 +1,11 @@
 #include "../../../include/console.h"
 
 void main(void) {
-  printf("ps1 executed\n");
+  // int i = 0;
+  // while(1) {
+  //   printf("%d ps1 executed\n", i);
+  //   i++;
+  // }
+
   while(1) {}
 }

@@ -33,9 +33,3 @@ make && make run && make clean
 10. Write a loader to load larger kernels by the ATA in protected mode ✓
 11. Append the ps1 to end of mars.img and load it at 0x20000 ✓
 12. Complete console and Add a shell (named soil)
-
-
-# Development notes
-For now maximum size of MarsOS can be 100KB.    
-This should be an unikernel?    
-Its better cantact me befor starting development if you need help.    

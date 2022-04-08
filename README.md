@@ -22,7 +22,8 @@ make && make run && make clean
     - Fork/Exec
     - Syscalls
 7. Filesystem
-    - ATA
+    - ATA 32-bit ✓
+    - ATA 64-bit
     - FAT16
     - FD
 8. Network stack

@@ -5,10 +5,12 @@ Feel free to contribute to MarsOS
 # Build & Run   
 Make sure you have installed [qemu-system-x86_64](https://archlinux.org/packages/extra/x86_64/qemu)
 ```console
-make && make run && make clean
+make ps && make run && make ps_clean
 ```
 
 # TODO
+current task: 13
+
 1. Should I make a programming language and rewrite this OS ?
 2. Removed
 3. Update Makefile   

@@ -22,7 +22,8 @@ current task: 13
     - Wait/Exit ✓
     - Sleep ✓
     - Fork/Exec
-    - Syscalls
+    - Syscalls ✓
+    - Ring0 processes
 7. Filesystem
     - FAT16
     - FD
@@ -34,5 +35,10 @@ current task: 13
     - PS2
 10. Write a loader to load larger kernels by the ATA in protected mode ✓
 11. Append the ps1 to end of mars.img and load it at 0x20000 ✓
-12. Complete console and Add a shell (named soil)
-13. Refactoring kernel/proc
+12. Complete console
+13. Refactoring kernel/proc ✓    
+14. Logger and panic    
+15. Write a shell (named soil)    
+
+# Notes
+1. Do not use the C typedef for structs

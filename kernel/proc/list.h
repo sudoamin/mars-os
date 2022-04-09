@@ -1,5 +1,7 @@
-#ifndef PROC_LIST_H
-#define PROC_LIST_H
+#ifndef _PROC_LIST_H
+#define _PROC_LIST_H
+
+#include "stdbool.h"
 
 struct list {
   struct node *head;

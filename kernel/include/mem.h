@@ -1,9 +1,9 @@
 #ifndef _MEM_H
 #define _MEM_H
 
-#include "stdbool.h"
-#include "stddef.h"
-#include "stdint.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 // see bootloader/mem.asm
 struct E820 {

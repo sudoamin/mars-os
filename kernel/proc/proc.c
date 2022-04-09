@@ -1,10 +1,9 @@
-#include "proc.h"
+#include <include/debug.h>
+#include <include/string.h>
+#include <kernel/include/idt.h>
+#include <kernel/include/mem.h>
+#include <kernel/include/proc.h>
 
-#include "../../include/debug.h"
-#include "../../include/string.h"
-#include "../console/print.h"
-#include "../int/idt.h"
-#include "../mem/mem.h"
 #include "list.c"
 #include "stddef.h"
 

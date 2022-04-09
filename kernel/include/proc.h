@@ -1,8 +1,9 @@
-#ifndef _PS_H
-#define _PS_H
+#ifndef _PROC_H
+#define _PROC_H
 
-#include "../int/idt.h"
-#include "stdbool.h"
+#include <kernel/include/idt.h>
+
+#include <stdbool.h>
 
 struct List {
   struct List *next;

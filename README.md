@@ -18,20 +18,19 @@ current task: 13
 5. Memory managment
     - Heap(malloc, free)
 6. Process managment
-    - Scheduler
-    - Wait/Exit
-    - Sleep
+    - Scheduler ✓
+    - Wait/Exit ✓
+    - Sleep ✓
     - Fork/Exec
     - Syscalls
 7. Filesystem
-    - ATA 32-bit ✓
-    - ATA 64-bit
     - FAT16
     - FD
 8. Network stack
 9. Drivers
     - RTL8139
-    - ATA
+    - ATA 32-bit ✓
+    - ATA 64-bit
     - PS2
 10. Write a loader to load larger kernels by the ATA in protected mode ✓
 11. Append the ps1 to end of mars.img and load it at 0x20000 ✓

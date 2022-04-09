@@ -1,10 +1,11 @@
-#include "syscall.h"
+#include <include/debug.h>
+#include <kernel/include/console.h>
+#include <kernel/include/proc.h>
+#include <kernel/include/syscall.h>
 
-#include "../../include/debug.h"
-#include "../console/print.h"
 #include "stddef.h"
 
-static SYSTEMCALL system_calls[10];
+static syscall_t syscalls[10];
 
 // when we call print function in the user program,
 // we just convert the message to the string,
@@ -43,10 +44,10 @@ static int sys_wait(int64_t *argptr) {
 }
 
 void init_syscall(void) {
-  system_calls[0] = sys_write;
-  system_calls[1] = sys_sleep;
-  system_calls[2] = sys_exit;
-  system_calls[3] = sys_wait;
+  syscalls[0] = sys_write;
+  syscalls[1] = sys_sleep;
+  syscalls[2] = sys_exit;
+  syscalls[3] = sys_wait;
 }
 
 void syscall(struct trap_frame *tf) {
@@ -63,9 +64,9 @@ void syscall(struct trap_frame *tf) {
     return;
   }
 
-  ASSERT(system_calls[i] != NULL);
+  ASSERT(syscalls[i] != NULL);
   // find syscall by the index,
   // pass the parameters and execute them
   // the rax holds the error code
-  tf->rax = system_calls[i](argptr);
+  tf->rax = syscalls[i](argptr);
 }

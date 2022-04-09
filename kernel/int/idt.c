@@ -1,4 +1,4 @@
-#include "idt.h"
+#include <kernel/include/idt.h>
 
 static struct idt_entry idt[TOTAL_INTERRUPTS];
 static struct idt_ptr *idt_ptr;

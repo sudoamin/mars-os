@@ -1,5 +1,7 @@
-#ifndef PRINT_H
-#define PRINT_H
+#ifndef CONSOLE_H
+#define CONSOLE_H
+
+void init_console();
 
 #define LINE_SIZE 160
 

@@ -1,7 +1,7 @@
-#include "print.h"
+#include <console.h>
+#include <mem.h>
+#include <string.h>
 
-#include "../../include/string.h"
-#include "../mem/mem.h"
 #include "stdarg.h"
 #include "stddef.h"
 #include "stdint.h"

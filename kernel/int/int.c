@@ -1,7 +1,7 @@
-#include "../console/print.h"
-#include "../proc/proc.h"
-#include "../syscall/syscall.h"
-#include "idt.h"
+#include <kernel/include/idt.h>
+#include <kernel/include/console.h>
+#include <kernel/include/proc.h>
+#include <kernel/include/syscall.h>
 
 static uint64_t ticks;
 

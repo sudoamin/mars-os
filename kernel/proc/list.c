@@ -1,63 +1,61 @@
-#include "proc.h"
-#include "stddef.h"
+#include "list.h"
 
-void append_list_tail(struct HeadList *list, struct List *item) {
-  item->next = NULL;
+#include <kernel/include/proc.h>
+#include <stddef.h>
 
-  if (is_list_empty(list)) {
-    list->next = item;
-    list->tail = item;
+void list_append(struct list *list, struct node *node) {
+  node->next = NULL;
+
+  if (list_is_empty(list)) {
+    list->head = node;
+    list->tail = node;
   } else {
-    list->tail->next = item;
-    list->tail = item;
+    list->tail->next = node;
+    list->tail = node;
   }
 }
 
+struct node *list_remove_head(struct list *list) {
+  struct node *item;
 
-struct List* remove_list(struct HeadList *list, int wait)
-{
-    struct List *current = list->next;
-    struct List *prev = (struct List*)list;
-    struct List *item = NULL;
-
-    while (current != NULL) {
-        if (((struct proc*)current)->wait == wait) {
-            prev->next = current->next;
-            item = current;
-
-            if (list->next == NULL) {
-                list->tail = NULL;
-            }
-            else if (current->next == NULL) {
-                list->tail = prev;
-            }
-
-            break;
-        }
-
-        prev = current;
-        current = current->next;    
-    }
-
-    return item;
-}
-
-
-struct List *remove_list_head(struct HeadList *list) {
-  struct List *item;
-
-  if (is_list_empty(list)) {
+  if (list_is_empty(list)) {
     return NULL;
   }
 
-  item = list->next;
-  list->next = item->next;
+  item = list->head;
+  list->head = item->next;
 
-  if (list->next == NULL) {
+  if (list->head == NULL) {
     list->tail = NULL;
   }
 
   return item;
 }
 
-bool is_list_empty(struct HeadList *list) { return (list->next == NULL); }
+struct node *list_remove(struct list *list, int wait) {
+  struct node *current = list->head;
+  struct node *prev = (struct node *)list;
+  struct node *item = NULL;
+
+  while (current != NULL) {
+    if (((struct proc *)current)->wait == wait) {
+      prev->next = current->next;
+      item = current;
+
+      if (list->head == NULL) {
+        list->tail = NULL;
+      } else if (current->next == NULL) {
+        list->tail = prev;
+      }
+
+      break;
+    }
+
+    prev = current;
+    current = current->next;
+  }
+
+  return item;
+}
+
+bool list_is_empty(struct list *list) { return (list->head == NULL); }

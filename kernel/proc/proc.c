@@ -1,96 +1,112 @@
-#include "proc.h"
+#include <include/debug.h>
+#include <include/string.h>
+#include <kernel/include/console.h>
+#include <kernel/include/idt.h>
+#include <kernel/include/mem.h>
+#include <kernel/include/proc.h>
+#include <stddef.h>
 
-#include "../../include/debug.h"
-#include "../../include/string.h"
-#include "../console/print.h"
-#include "../int/idt.h"
-#include "../mem/mem.h"
 #include "list.c"
-#include "stddef.h"
+#include "tss.c"
 
-// tss.asm
-extern struct TSS TSS;
+// the programs are loaded into memory when we are in protected mode
+// TODO, load programs from the boot driver or another locations
+paddr_t programs[2] = {0x20000, 0x30000};
 
-static struct proc proces[NUM_PROC];
-// pid_num is used to allocate a new proccess
-// with a identification number
-static int pid_num = 1;
+// because we have not heap
+static struct proc ps_list[MAX_PROC_NUM];
 
-static struct ProcessControl pc;
+static int last_pid = 1;
 
-static void set_tss(struct proc *proc) { TSS.rsp0 = proc->kstack + STACK_SIZE; }
+static struct proc *current_ps;
+static struct list ready_list;
+static struct list wait_list;
+static struct list kill_list;
 
-static struct proc *find_unused_process(void) {
-  struct proc *process = NULL;
+static struct proc *new_proc(paddr_t code);
+static void switch_process(struct proc *prev, struct proc *current);
+static void schedule(void);
 
-  for (int i = 0; i < NUM_PROC; i++) {
-    if (proces[i].state == PROC_UNUSED) {
-      process = &proces[i];
+// init_proc initializes and executes first programs
+void init_proc(void) {
+  // convert programs to processes and append them to ready_list for executing
+  for (int i = 0; i < sizeof(programs) / sizeof(paddr_t); i++) {
+    struct proc *p = new_proc(programs[i]);
+    list_append(&ready_list, (struct node *)p);
+  }
+
+  // execute first program
+  struct proc *ps = (struct proc *)list_remove_head(&ready_list);
+  ps->state = PROC_RUNNING;
+  current_ps = ps;
+
+  set_tss(ps);
+  switch_vm(ps->pml4);
+  pstart(ps->tf);
+}
+
+// code is the physical address of the program (RAM)
+static struct proc *new_proc(paddr_t code) {
+  // because we have not heap
+  struct proc *ps;
+  for (int i = 0; i < MAX_PROC_NUM; i++) {
+    if (ps_list[i].state == PROC_UNUSED) {
+      ps = &ps_list[i];
       break;
     }
   }
 
-  return process;
-}
-
-static void set_process_entry(struct proc *proc, uint64_t addr) {
-  uint64_t stack_top;
-
-  proc->state = PROC_INIT;
-  proc->pid = pid_num++;
-
-  proc->kstack = (uint64_t)kalloc();
-  ASSERT(proc->kstack != 0);
-
-  memset((void *)proc->kstack, 0, PAGE_SIZE);
-  stack_top = proc->kstack + STACK_SIZE;
-
-  proc->context = stack_top - sizeof(struct trap_frame) - 7 * 8;
-  *(uint64_t *)(proc->context + 6 * 8) = (uint64_t)int_return;
-
-  proc->tf = (struct trap_frame *)(stack_top - sizeof(struct trap_frame));
-  proc->tf->cs = 0x10 | 3;
-  proc->tf->rip = 0x400000;
-  proc->tf->ss = 0x18 | 3;
-  proc->tf->rsp = 0x400000 + PAGE_SIZE;
-  proc->tf->rflags = 0x202;
-
-  proc->pml4 = setup_kvm();
-  ASSERT(proc->pml4 != 0);
-  ASSERT(setup_uvm(proc->pml4, P2V(addr), 5120));
-  proc->state = PROC_READY;
-}
-
-static struct ProcessControl *get_pc(void) { return &pc; }
-
-void init_proc(void) {
-  struct ProcessControl *process_control;
-  struct proc *process;
-  struct HeadList *list;
-  uint64_t addr[2] = {0x20000, 0x30000};
-
-  process_control = get_pc();
-  list = &process_control->ready_list;
-
-  for (int i = 0; i < 2; i++) {
-    process = find_unused_process();
-    set_process_entry(process, addr[i]);
-    append_list_tail(list, (struct List *)process);
+  vaddr_t page = (vaddr_t)kalloc();
+  if (page == 0) {
+    // TODO, LOG
+    return -1;
   }
+  memset((void *)page, 0, PAGE_SIZE);
+  ps->kstack = page;
+  vaddr_t stack_top = ps->kstack + STACK_SIZE;
+
+  ps->state = PROC_INIT;
+  ps->pid = last_pid;
+  last_pid += 1;
+
+  ps->context = stack_top - sizeof(struct trap_frame) - 7 * 8;
+  *(vaddr_t *)(ps->context + 6 * 8) = (vaddr_t)int_return;
+
+  ps->tf = (struct trap_frame *)(stack_top - sizeof(struct trap_frame));
+  ps->tf->cs = 0x10 | 3;
+  ps->tf->ss = 0x18 | 3;
+  ps->tf->rflags = 0x202;
+  ps->tf->rip = 0x400000;
+  ps->tf->rsp = 0x400000 + PAGE_SIZE;
+
+  ps->pml4 = setup_kvm();
+  if (ps->pml4 == 0) {
+    // TODO, LOG
+    return -1;
+  }
+
+  if (!setup_uvm(ps->pml4, P2V(code), 5120)) {
+    // TODO, LOG
+    return -1;
+  }
+
+  ps->state = PROC_READY;
+
+  return ps;
 }
 
-void launch(void) {
-  struct ProcessControl *process_control;
-  struct proc *process;
+// yield is called in the kernel/int/int.c
+// to context switching by the timer
+void proc_contex_switch(void) {
+  if (list_is_empty(&ready_list)) {
+    return;
+  }
 
-  process_control = get_pc();
-  process = (struct proc *)remove_list_head(&process_control->ready_list);
-  process->state = PROC_RUNNING;
-  process_control->current_process = process;
+  struct proc *ps = current_ps;
+  ps->state = PROC_READY;
+  list_append(&ready_list, (struct Node *)ps);
 
-  set_tss(process);
-  switch_vm(process->pml4);
-  pstart(process->tf);
+  schedule();
 }
 
 static void switch_process(struct proc *prev, struct proc *current) {
@@ -100,107 +116,57 @@ static void switch_process(struct proc *prev, struct proc *current) {
 }
 
 static void schedule(void) {
-  struct proc *prev_proc;
-  struct proc *current_proc;
-  struct ProcessControl *process_control;
-  struct HeadList *list;
+  ASSERT(!list_is_empty(&ready_list));
 
-  process_control = get_pc();
-  prev_proc = process_control->current_process;
-  list = &process_control->ready_list;
-  ASSERT(!is_list_empty(list));
+  struct proc *next_ps = (struct proc *)list_remove_head(&ready_list);
+  next_ps->state = PROC_RUNNING;
 
-  current_proc = (struct proc *)remove_list_head(list);
-  current_proc->state = PROC_RUNNING;
-  process_control->current_process = current_proc;
-
-  switch_process(prev_proc, current_proc);
+  struct proc *prev_ps = current_ps;
+  current_ps = next_ps;
+  switch_process(prev_ps, next_ps);
 }
 
-void yield(void) {
-  struct ProcessControl *process_control;
-  struct proc *process;
-  struct HeadList *list;
+void proc_sleep(int wait) {
+  struct proc *ps = current_ps;
+  ps->state = PROC_SLEEP;
+  ps->wait = wait;
+  list_append(&wait_list, (struct Node *)ps);
 
-  process_control = get_pc();
-  list = &process_control->ready_list;
-
-  if (is_list_empty(list)) {
-    return;
-  }
-
-  process = process_control->current_process;
-  process->state = PROC_READY;
-  append_list_tail(list, (struct List *)process);
   schedule();
 }
 
-void sleep(int wait) {
-  struct ProcessControl *process_control;
-  struct proc *process;
-
-  process_control = get_pc();
-  process = process_control->current_process;
-  process->state = PROC_SLEEP;
-  process->wait = wait;
-
-  append_list_tail(&process_control->wait_list, (struct List *)process);
-  schedule();
-}
-
-void wake_up(int wait) {
-  struct ProcessControl *process_control;
-  struct proc *process;
-  struct HeadList *ready_list;
-  struct HeadList *wait_list;
-
-  process_control = get_pc();
-  ready_list = &process_control->ready_list;
-  wait_list = &process_control->wait_list;
-  process = (struct proc *)remove_list(wait_list, wait);
+void proc_wake_up(int wait) {
+  struct proc *ps = (struct proc *)list_remove(&wait_list, wait);
   // generally, we could have multiple processes waiting on the same object
   // find all the waiting processes in the list
-  while (process != NULL) {
-    process->state = PROC_READY;
-    append_list_tail(ready_list, (struct List *)process);
-    process = (struct proc *)remove_list(wait_list, wait);
+  while (ps != NULL) {
+    ps->state = PROC_READY;
+    list_append(&ready_list, (struct Node *)ps);
+    ps = (struct proc *)list_remove(&wait_list, wait);
   }
 }
 
-void exit(void) {
-  struct ProcessControl *process_control;
-  struct proc *process;
-  struct HeadList *list;
+void proc_exit(void) {
+  struct proc *ps = current_ps;
+  ps->state = PROC_KILLED;
 
-  process_control = get_pc();
-  process = process_control->current_process;
-  process->state = PROC_KILLED;
+  list_append(&kill_list, (struct Node *)ps);
 
-  list = &process_control->kill_list;
-  append_list_tail(list, (struct List *)process);
-
-  wake_up(1);
+  proc_wake_up(1);
   schedule();
 }
 
-void wait(void) {
-  struct ProcessControl *process_control;
-  struct proc *process;
-  struct HeadList *list;
-
-  process_control = get_pc();
-  list = &process_control->kill_list;
-
+void proc_wait(void) {
   while (1) {
-    if (!is_list_empty(list)) {
-      process = (struct proc *)remove_list_head(list);
-      ASSERT(process->state == PROC_KILLED);
+    if (!list_is_empty(&kill_list)) {
+      struct proc *ps = (struct proc *)list_remove_head(&kill_list);
+      ASSERT(ps->state == PROC_KILLED);
 
-      kfree(process->kstack);
-      free_vm(process->pml4);
-      memset(process, 0, sizeof(struct proc));
+      kfree(ps->kstack);
+      free_vm(ps->pml4);
+      memset(ps, 0, sizeof(struct proc));
     } else {
-      sleep(1);
+      proc_sleep(1);
     }
   }
 }

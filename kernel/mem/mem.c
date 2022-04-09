@@ -1,8 +1,7 @@
-#include "mem.h"
+#include <include/debug.h>
+#include <include/string.h>
+#include <kernel/include/mem.h>
 
-#include "../../include/debug.h"
-#include "../../include/string.h"
-#include "../console/print.h"
 #include "stdbool.h"
 #include "stddef.h"
 

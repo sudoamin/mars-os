@@ -1,9 +1,8 @@
 #ifndef STRING_H
 #define STRING_H
 
+#include <stddef.h>
 #include <stdint.h>
-
-#include "stddef.h"
 
 void memset(void *buffer, char value, int size);
 void memmove(void *dst, void *src, int size);

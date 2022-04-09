@@ -1,11 +1,11 @@
 section .text
 
-global syscall_write
-global syscall_sleep
-global syscall_exit
-global syscall_wait
+global sys_print
+global sys_sleep
+global sys_exit
+global sys_wait
 
-syscall_write:
+sys_print:
       ; allocate 16-byte space on the stack for the arguments
       sub rsp, 16
 
@@ -35,7 +35,7 @@ syscall_write:
       
       ret
 
-syscall_sleep:
+sys_sleep:
     sub rsp,8
     mov eax,1
 
@@ -50,7 +50,7 @@ syscall_sleep:
     ret
 
     
-syscall_exit:
+sys_exit:
     mov eax,2
     mov rdi,0
 
@@ -58,7 +58,7 @@ syscall_exit:
 
     ret
 
-syscall_wait:
+sys_wait:
     mov eax,3
     mov rdi,0
 

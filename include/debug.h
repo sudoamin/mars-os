@@ -1,7 +1,7 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include "stdint.h"
+#include <stdint.h>
 
 #define ASSERT(e)                              \
   do {                                         \

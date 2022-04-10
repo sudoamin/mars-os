@@ -1,6 +1,6 @@
-#include "../../include/string.h"
-
-#include "stdint.h"
+#include <include/string.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 // Searches s1 for the presence of s2. If the string array s2 is found in the
 // string arrays s1, the utility will return a pointer to the location of s2.

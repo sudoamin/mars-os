@@ -32,6 +32,10 @@ void init_proc(void) {
   // convert programs to processes and append them to ready_list for executing
   for (int i = 0; i < sizeof(programs) / sizeof(paddr_t); i++) {
     struct proc *p = new_proc(programs[i]);
+    if (p == -1) {
+      // TODO, LOG, not enough process to load all programs
+    }
+
     list_append(&ready_list, (struct node *)p);
   }
 
@@ -56,6 +60,15 @@ static struct proc *new_proc(paddr_t code) {
     }
   }
 
+  // change process state and set process ID
+  ps->state = PROC_INIT;
+  ps->pid = last_pid;
+  last_pid += 1;
+
+  // A process has two stacks
+  // one is for kernel mode and another is for user mode
+
+  // for the kernel stack
   vaddr_t page = (vaddr_t)kalloc();
   if (page == 0) {
     // TODO, LOG
@@ -63,28 +76,38 @@ static struct proc *new_proc(paddr_t code) {
   }
   memset((void *)page, 0, PAGE_SIZE);
   ps->kstack = page;
-  vaddr_t stack_top = ps->kstack + STACK_SIZE;
+  vaddr_t kstack_top = ps->kstack + STACK_SIZE;
 
-  ps->state = PROC_INIT;
-  ps->pid = last_pid;
-  last_pid += 1;
-
-  ps->context = stack_top - sizeof(struct trap_frame) - 7 * 8;
+  ps->context = kstack_top - sizeof(struct trap_frame) - 7 * 8;
   *(vaddr_t *)(ps->context + 6 * 8) = (vaddr_t)int_return;
 
-  ps->tf = (struct trap_frame *)(stack_top - sizeof(struct trap_frame));
+  // tf holds the start address of the trap_frame structure
+  ps->tf = (struct trap_frame *)(kstack_top - sizeof(struct trap_frame));
+  // these fields will be popped to the segment or general-purpose registers,
+  // when the iretq instruction executes.
+
   ps->tf->cs = 0x10 | 3;
   ps->tf->ss = 0x18 | 3;
   ps->tf->rflags = 0x202;
+  // the code
   ps->tf->rip = 0x400000;
+  // the user stack
   ps->tf->rsp = 0x400000 + PAGE_SIZE;
 
+  // Each process has own address space
+  // the kernel space is the same among all the processes
+  // the user space saves its own program instructions and data
+
+  // create the new kernel space
   ps->pml4 = setup_kvm();
   if (ps->pml4 == 0) {
     // TODO, LOG
     return -1;
   }
 
+  // create the user space
+  // and remap the code physical address to the virtual user space
+  // always the address of the viraul user space is 400000
   if (!setup_uvm(ps->pml4, P2V(code), 5120)) {
     // TODO, LOG
     return -1;

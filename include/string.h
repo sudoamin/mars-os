@@ -24,4 +24,6 @@ int decimal_to_string(char *buffer, int position, int64_t digits);
 int hex_to_string(char *buffer, int position, uint64_t digits);
 int read_string(char *buffer, int position, const char *string);
 
+// char *itoa(int num, char *str, int base);
+
 #endif

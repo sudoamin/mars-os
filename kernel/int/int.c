@@ -9,7 +9,7 @@ uint64_t get_ticks(void) { return ticks; }
 
 static void timer_handler(void) {
   ticks++;
-  wake_up(-1);
+  proc_wake_up(-1);
 }
 
 // int_handler will be called when we jump from ring3 to ring0.
@@ -38,7 +38,7 @@ void int_handler(struct trap_frame *tf) {
     default:
       if ((tf->cs & 3) == 3) {
         printk("\nException is %d\n", tf->trapno);
-        exit();
+        proc_exit();
         break;
       }
       printk("[Error %d at ring %d] %d:%x %x", tf->trapno, (tf->cs & 3),
@@ -48,6 +48,6 @@ void int_handler(struct trap_frame *tf) {
   }
 
   if (tf->trapno == 32) {
-    yield();
+    proc_contex_switch();
   }
 }

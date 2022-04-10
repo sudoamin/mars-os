@@ -58,18 +58,18 @@ static int sys_proc_sleep(int64_t *argptr) {
   old_ticks = ticks;
 
   while (ticks - old_ticks < sleep_ticks) {
-    sleep(-1);
+    proc_sleep(-1);
     ticks = get_ticks();
   }
   return 0;
 }
 
 static int sys_proc_exit(int64_t *argptr) {
-  exit();
+  proc_exit();
   return 0;
 }
 
 static int sys_proc_wait(int64_t *argptr) {
-  wait();
+  proc_wait();
   return 0;
 }

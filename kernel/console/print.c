@@ -8,7 +8,7 @@
 
 static struct screen_bf screen_bf = {(char *)P2V(0xb8000), 0, 0};
 
-void write_screen(const char *buffer, int size, char color) {
+void console_write(const char *buffer, int size, char color) {
   struct screen_bf *sb = &screen_bf;
   int column = sb->column;
   int row = sb->row;
@@ -94,13 +94,13 @@ int printk(const char *format, ...) {
     }
   }
 
-  write_screen(buffer, buffer_size, 0xf);
+  console_write(buffer, buffer_size, 0xf);
   va_end(args);
 
   return buffer_size;
 }
 
-void clear_screen() {
+void console_clear() {
   for (size_t i = 0; i < 200; i++) {
     for (size_t i = 0; i < 200; i++) {
       printk(" ");

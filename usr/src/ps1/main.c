@@ -14,5 +14,5 @@ void main(void) {
 
   // while (1) {
   // }
-  syscall_wait();
+  sys_wait();
 }

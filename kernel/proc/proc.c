@@ -3,9 +3,9 @@
 #include <kernel/include/idt.h>
 #include <kernel/include/mem.h>
 #include <kernel/include/proc.h>
+#include <stddef.h>
 
 #include "list.c"
-#include "stddef.h"
 
 // tss.asm
 extern struct TSS TSS;

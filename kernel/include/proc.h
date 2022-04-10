@@ -2,7 +2,6 @@
 #define _PROC_H
 
 #include <kernel/include/idt.h>
-
 #include <stdbool.h>
 
 struct List {

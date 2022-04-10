@@ -1,10 +1,9 @@
-#include "../../include/console.h"
-
-#include "../../include/string.h"
-#include "../../include/syscall.h"
-#include "stdarg.h"
-#include "stddef.h"
-#include "stdint.h"
+#include <include/console.h>
+#include <include/string.h>
+#include <include/syscall.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdint.h>
 
 int printf(const char *format, ...) {
   char buffer[1024];
@@ -48,7 +47,7 @@ int printf(const char *format, ...) {
     }
   }
 
-  buffer_size = syscall_write(buffer, buffer_size);
+  buffer_size = sys_print(buffer, buffer_size);
   va_end(args);
 
   return buffer_size;

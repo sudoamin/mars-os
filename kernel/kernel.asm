@@ -24,6 +24,8 @@ init:
       retf
 
 main:
+      mov rsp, 0xffff800000200000
+
       call kinit
       ; sti
       call kmain

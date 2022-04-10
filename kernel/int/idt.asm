@@ -76,6 +76,13 @@ int_return:
     pop	rax
 
     ; skip int number and error code
+    ; then the stack pointer is pointing to the trap_frame 5 fields
+    ; cs, ss, rflags, rip, rsp in the process panagment file
+    ; rip 0x400000    LOW ADDRESS (rsp points to here. 0x600000. the top of stack)
+    ; cs
+    ; rflags
+    ; rsp 0x600000
+    ; ss              HIGH ADDRESS
     add rsp, 16
     iretq
 

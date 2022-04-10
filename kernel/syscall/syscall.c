@@ -1,3 +1,4 @@
+#include <drivers/include/ps2.h>
 #include <include/debug.h>
 #include <kernel/include/console.h>
 #include <kernel/include/proc.h>
@@ -8,6 +9,7 @@ static int sys_console_print(int64_t *argptr);
 static int sys_proc_sleep(int64_t *argptr);
 static int sys_proc_exit(int64_t *argptr);
 static int sys_proc_wait(int64_t *argptr);
+static int sys_keyboard_read(int64_t *argptr);
 
 static syscall_t syscalls[10];
 
@@ -16,6 +18,7 @@ void init_syscall(void) {
   syscalls[1] = sys_proc_sleep;
   syscalls[2] = sys_proc_exit;
   syscalls[3] = sys_proc_wait;
+  syscalls[4] = sys_keyboard_read;
 }
 
 void syscall(struct trap_frame *tf) {
@@ -58,7 +61,7 @@ static int sys_proc_sleep(int64_t *argptr) {
   old_ticks = ticks;
 
   while (ticks - old_ticks < sleep_ticks) {
-    proc_sleep(-1);
+    proc_sleep(2);
     ticks = get_ticks();
   }
   return 0;
@@ -72,4 +75,8 @@ static int sys_proc_exit(int64_t *argptr) {
 static int sys_proc_wait(int64_t *argptr) {
   proc_wait();
   return 0;
+}
+
+static int sys_keyboard_read(int64_t *argptr) {
+  return read_key_buffer();
 }

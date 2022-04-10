@@ -1,16 +1,16 @@
-#include <kernel/include/idt.h>
 #include <kernel/include/console.h>
+#include <kernel/include/idt.h>
 #include <kernel/include/proc.h>
 #include <kernel/include/syscall.h>
+
+// make object and include header file
+#include "../../drivers/ps2/ps2.c"
 
 static uint64_t ticks;
 
 uint64_t get_ticks(void) { return ticks; }
 
-static void timer_handler(void) {
-  ticks++;
-  proc_wake_up(-1);
-}
+static void timer_handler(void);
 
 // int_handler will be called when we jump from ring3 to ring0.
 // when an interrupt or exception occours
@@ -20,6 +20,11 @@ void int_handler(struct trap_frame *tf) {
   switch (tf->trapno) {
     case 32:
       timer_handler();
+      eoi();
+      break;
+
+    case 33:
+      ps2_handler();
       eoi();
       break;
 
@@ -50,4 +55,9 @@ void int_handler(struct trap_frame *tf) {
   if (tf->trapno == 32) {
     proc_contex_switch();
   }
+}
+
+static void timer_handler(void) {
+  ticks++;
+  proc_wake_up(2);
 }

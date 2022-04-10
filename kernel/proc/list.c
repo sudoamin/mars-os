@@ -55,6 +55,8 @@ struct node *list_remove(struct list *list, int wait) {
     current = current->next;
   }
 
+    // printk("%u *", ((struct proc *)item)->pid);
+
   return item;
 }
 

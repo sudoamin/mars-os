@@ -127,7 +127,7 @@ void proc_contex_switch(void) {
 
   struct proc *ps = current_ps;
   ps->state = PROC_READY;
-  list_append(&ready_list, (struct Node *)ps);
+  list_append(&ready_list, (struct node *)ps);
 
   schedule();
 }
@@ -153,8 +153,8 @@ void proc_sleep(int wait) {
   struct proc *ps = current_ps;
   ps->state = PROC_SLEEP;
   ps->wait = wait;
-  list_append(&wait_list, (struct Node *)ps);
-
+  // printk("%u %u *", ps->wait, wait);
+  list_append(&wait_list, (struct node *)ps);
   schedule();
 }
 
@@ -164,7 +164,7 @@ void proc_wake_up(int wait) {
   // find all the waiting processes in the list
   while (ps != NULL) {
     ps->state = PROC_READY;
-    list_append(&ready_list, (struct Node *)ps);
+    list_append(&ready_list, (struct node *)ps);
     ps = (struct proc *)list_remove(&wait_list, wait);
   }
 }
@@ -173,7 +173,7 @@ void proc_exit(void) {
   struct proc *ps = current_ps;
   ps->state = PROC_KILLED;
 
-  list_append(&kill_list, (struct Node *)ps);
+  list_append(&kill_list, (struct node *)ps);
 
   proc_wake_up(1);
   schedule();

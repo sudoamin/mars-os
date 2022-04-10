@@ -23,6 +23,7 @@ global vector17
 global vector18
 global vector19
 global vector32
+global vector33
 global vector39
 global sysint
 
@@ -33,6 +34,9 @@ global int_return
 global load_idt
 global pstart
 global swap
+
+global in_byte
+
 
 interrupt:
     push rax
@@ -175,6 +179,12 @@ vector32:
     push 32
     jmp interrupt
 
+; the keyboard interrupt handler
+vector33:
+    push 0
+    push 33
+    jmp interrupt
+
 vector39:
     push 0
     push 39
@@ -241,3 +251,10 @@ swap:
     pop rbx
     
     ret
+
+in_byte:
+    ; port number
+    mov rdx, rdi
+    ; read data
+    in al, dx
+    ret   

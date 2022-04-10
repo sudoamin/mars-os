@@ -1,6 +1,7 @@
 section .text
 
 global sys_print
+global sys_kbrd_read
 global sys_sleep
 global sys_exit
 global sys_wait
@@ -34,6 +35,14 @@ sys_print:
       add rsp, 16
       
       ret
+
+sys_kbrd_read:
+    mov eax,4
+    xor edi,edi
+    
+    int 0x80
+
+    ret
 
 sys_sleep:
     sub rsp,8

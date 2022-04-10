@@ -31,6 +31,7 @@ void init_idt() {
   idt_entry_set(&idt[17], (uint64_t)vector17, 0x8e);
   idt_entry_set(&idt[19], (uint64_t)vector19, 0x8e);
   idt_entry_set(&idt[32], (uint64_t)vector32, 0x8e);
+  idt_entry_set(&idt[33], (uint64_t)vector33, 0x8e);
   idt_entry_set(&idt[39], (uint64_t)vector39, 0x8e);
 
   // 0xee, set dpl to 3 instead of 0

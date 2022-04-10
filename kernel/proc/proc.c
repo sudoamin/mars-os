@@ -34,13 +34,14 @@ void init_proc(void) {
     struct proc *p = new_proc(programs[i]);
     if (p == -1) {
       // TODO, LOG, not enough process to load all programs
+      return;
     }
 
-    list_append(&ready_list, (struct node *)p);
+    list_append(&ready_list, p);
   }
 
   // execute first program
-  struct proc *ps = (struct proc *)list_remove_head(&ready_list);
+  struct proc *ps = list_remove_head(&ready_list);
   ps->state = PROC_RUNNING;
   current_ps = ps;
 
@@ -127,7 +128,7 @@ void proc_contex_switch(void) {
 
   struct proc *ps = current_ps;
   ps->state = PROC_READY;
-  list_append(&ready_list, (struct node *)ps);
+  list_append(&ready_list, ps);
 
   schedule();
 }
@@ -153,19 +154,19 @@ void proc_sleep(int wait) {
   struct proc *ps = current_ps;
   ps->state = PROC_SLEEP;
   ps->wait = wait;
-  // printk("%u %u *", ps->wait, wait);
-  list_append(&wait_list, (struct node *)ps);
+  list_append(&wait_list, ps);
+
   schedule();
 }
 
 void proc_wake_up(int wait) {
-  struct proc *ps = (struct proc *)list_remove(&wait_list, wait);
+  struct proc *ps = list_remove(&wait_list, wait);
   // generally, we could have multiple processes waiting on the same object
   // find all the waiting processes in the list
   while (ps != NULL) {
     ps->state = PROC_READY;
-    list_append(&ready_list, (struct node *)ps);
-    ps = (struct proc *)list_remove(&wait_list, wait);
+    list_append(&ready_list, ps);
+    ps = list_remove(&wait_list, wait);
   }
 }
 
@@ -173,7 +174,7 @@ void proc_exit(void) {
   struct proc *ps = current_ps;
   ps->state = PROC_KILLED;
 
-  list_append(&kill_list, (struct node *)ps);
+  list_append(&kill_list, ps);
 
   proc_wake_up(1);
   schedule();
@@ -182,7 +183,7 @@ void proc_exit(void) {
 void proc_wait(void) {
   while (1) {
     if (!list_is_empty(&kill_list)) {
-      struct proc *ps = (struct proc *)list_remove_head(&kill_list);
+      struct proc *ps = list_remove_head(&kill_list);
       ASSERT(ps->state == PROC_KILLED);
 
       kfree(ps->kstack);

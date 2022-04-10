@@ -3,20 +3,20 @@
 #include <kernel/include/proc.h>
 #include <stddef.h>
 
-void list_append(struct list *list, struct node *node) {
-  node->next = NULL;
+void list_append(struct list *list, struct proc *proc) {
+  proc->next = NULL;
 
   if (list_is_empty(list)) {
-    list->head = node;
-    list->tail = node;
+    list->head = proc;
+    list->tail = proc;
   } else {
-    list->tail->next = node;
-    list->tail = node;
+    list->tail->next = proc;
+    list->tail = proc;
   }
 }
 
-struct node *list_remove_head(struct list *list) {
-  struct node *item;
+struct proc *list_remove_head(struct list *list) {
+  struct proc *item;
 
   if (list_is_empty(list)) {
     return NULL;
@@ -32,13 +32,13 @@ struct node *list_remove_head(struct list *list) {
   return item;
 }
 
-struct node *list_remove(struct list *list, int wait) {
-  struct node *current = list->head;
-  struct node *prev = (struct node *)list;
-  struct node *item = NULL;
+struct proc *list_remove(struct list *list, int wait) {
+  struct proc *current = list->head;
+  struct proc *prev = list;
+  struct proc *item = NULL;
 
   while (current != NULL) {
-    if (((struct proc *)current)->wait == wait) {
+    if (current->wait == wait) {
       prev->next = current->next;
       item = current;
 

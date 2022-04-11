@@ -9,7 +9,7 @@ make ps && make run && make ps_clean
 ```
 
 # TODO
-current task: 13
+current task: 12
 
 1. Should I make a programming language and rewrite this OS ?
 2. Removed
@@ -38,7 +38,8 @@ current task: 13
 12. Complete console
 13. Refactoring kernel/proc ✓    
 14. Logger and panic    
-15. Write a shell (named soil)    
+15. Write a shell (named Rover)    
+16. Linker & Loader
 
 # Notes
 1. Do not use the C typedef for structs

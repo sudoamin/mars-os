@@ -58,7 +58,7 @@ static int sys_proc_sleep(int64_t *argptr) {
   old_ticks = ticks;
 
   while (ticks - old_ticks < sleep_ticks) {
-    proc_sleep(-1);
+    proc_sleep(1);
     ticks = get_ticks();
   }
   return 0;

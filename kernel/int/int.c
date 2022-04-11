@@ -9,7 +9,7 @@ uint64_t get_ticks(void) { return ticks; }
 
 static void timer_handler(void) {
   ticks++;
-  proc_wake_up(-1);
+  proc_wake_up(1);
 }
 
 // int_handler will be called when we jump from ring3 to ring0.

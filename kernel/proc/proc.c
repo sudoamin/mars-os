@@ -191,7 +191,7 @@ void proc_exit(void) {
 
   kill_list = *list_append(&kill_list, ps);
 
-  proc_wake_up(1);
+  proc_wake_up(2);
   schedule();
 }
 
@@ -205,7 +205,7 @@ void proc_wait(void) {
       free_vm(ps->pml4);
       memset(ps, 0, sizeof(struct proc));
     } else {
-      proc_sleep(1);
+      proc_sleep(2);
     }
   }
 }

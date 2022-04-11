@@ -1,4 +1,5 @@
 #include <include/console.h>
+#include <include/string.h>
 #include <include/syscall.h>
 
 void main(void) {
@@ -16,6 +17,14 @@ void main(void) {
   // }
   // sys_wait();
 
+  char ch[2] = {0};
   while (1) {
+    ch[0] = sys_kbrd_read();
+    //  sys_kbrd_read();
+    printf("%s", ch);
   }
+
+  // char ch[2] = {0};
+  // ch[0] = 33;
+  // printf("%s", ch);
 }

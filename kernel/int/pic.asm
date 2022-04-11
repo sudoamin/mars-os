@@ -43,9 +43,8 @@ pic_init:
       out 0x21, al
       out 0xa1, al
 
-      ; TODO
-      ; only the IRQ 0 of the master will fire interrupts
-      mov al, 11111110b ; only IRQ 0 of master 
+      ; the timer and keyboard will fire the interrupts
+      mov al, 11111100b
       out 0x21, al
       mov al, 11111111b ; turn off slave interrupts
       out 0xa1, al

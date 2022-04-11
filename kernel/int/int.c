@@ -1,5 +1,6 @@
-#include <kernel/include/idt.h>
+#include <drivers/include/ps2.h>
 #include <kernel/include/console.h>
+#include <kernel/include/idt.h>
 #include <kernel/include/proc.h>
 #include <kernel/include/syscall.h>
 
@@ -20,6 +21,11 @@ void int_handler(struct trap_frame *tf) {
   switch (tf->trapno) {
     case 32:
       timer_handler();
+      eoi();
+      break;
+
+    case 33:
+      ps2_handler();
       eoi();
       break;
 

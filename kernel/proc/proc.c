@@ -146,7 +146,11 @@ static void switch_process(struct proc *prev, struct proc *current) {
 }
 
 static void schedule(void) {
-  ASSERT(!list_is_empty(&ready_list));
+  // ASSERT(!);
+  if (list_is_empty(&ready_list)) {
+    printk("151 proc.c");
+    return;
+  }
 
   struct proc *next_ps = ready_list.head;
   next_ps->state = PROC_RUNNING;
@@ -173,6 +177,9 @@ void proc_wake_up(int wait) {
   }
 
   struct proc *ps = list_find(&wait_list, wait);
+  if (ps == NULL) {
+    return;
+  }
   wait_list = *list_remove(&wait_list, ps);
   // generally, we could have multiple processes waiting on the same object
   // find all the waiting processes in the list
@@ -181,6 +188,9 @@ void proc_wake_up(int wait) {
     ready_list = *list_append(&ready_list, ps);
 
     ps = list_find(&wait_list, wait);
+    if (ps == NULL) {
+      return;
+    }
     wait_list = *list_remove(&wait_list, ps);
   }
 }

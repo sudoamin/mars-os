@@ -9,7 +9,7 @@ make ps && make run && make ps_clean
 ```
 
 # TODO
-current task: 12
+current task: 15
 
 1. Should I make a programming language and rewrite this OS ?
 2. Removed
@@ -32,10 +32,10 @@ current task: 12
     - RTL8139
     - ATA 32-bit ✓
     - ATA 64-bit
-    - PS2
+    - PS2 ✓
 10. Write a loader to load larger kernels by the ATA in protected mode ✓
 11. Append the ps1 to end of mars.img and load it at 0x20000 ✓
-12. Complete console
+12. Complete console ✓
 13. Refactoring kernel/proc ✓    
 14. Logger and panic    
 15. Write a shell (named Rover)    

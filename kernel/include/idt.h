@@ -82,6 +82,7 @@ void vector16(void);
 void vector17(void);
 void vector19(void);
 void vector32(void);
+void vector33(void);
 void vector39(void);
 void sysint(void);
 

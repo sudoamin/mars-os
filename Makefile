@@ -5,7 +5,7 @@ U_INCLUDE = -I. -Iinclude -Iusr/include
 OBJECTS = build/kernel.s.o build/kernel.o \
 	build/idt.s.o build/idt.o build/int.o \
 	build/mem.o build/mem.s.o build/proc.o build/syscall.o \
-	build/kconsole.o
+	build/kconsole.o build/ps2.o
 
 all: image
 .PHONY: bootloader kernel
@@ -29,6 +29,8 @@ kernel: lib.a
 	${CC} ${C_FLAGS} ${K_INCLUDE} -c kernel/mem/mem.c -o build/mem.o
 	${CC} ${C_FLAGS} ${K_INCLUDE} -c kernel/proc/proc.c -o build/proc.o
 	${CC} ${C_FLAGS} ${K_INCLUDE} -c kernel/syscall/syscall.c -o build/syscall.o
+
+	${CC} ${C_FLAGS} ${K_INCLUDE} -c drivers/ps2/ps2.c -o build/ps2.o
 
 	ld -nostdlib -T linker.ld -o build/kernel.elf ${OBJECTS} build/lib.a
 	

@@ -1,23 +1,24 @@
 OUTPUT_FORMAT("elf64-x86-64")
-ENTRY(execute)
+ENTRY(_start)
 
 SECTIONS
 {
-      . = 0x400000;
-      .text : {
-            *(.text)
-      }
+    . = 0x400000;
 
-      .rodata : {
-            *(.rodata)
-      }
+    .text : {
+        *(.text)
+    }
 
-      . = ALIGN(16);
-      .data : {
-            *(.data)
-      }
+    .rodata : {
+        *(.rodata)
+    }
 
-      .bss : {
-            *(.bss)
-      }
+    . = ALIGN(16);
+    .data : {
+        *(.data)
+    }
+
+    .bss : {
+        *(.bss)
+    }
 }

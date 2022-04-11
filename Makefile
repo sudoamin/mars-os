@@ -53,15 +53,15 @@ ps: image
 	objcopy -O binary usr/src/ps1/build/ps1 usr/src/ps1/build/ps1.bin
 	dd if=usr/src/ps1/build/ps1.bin of=build/mars.img bs=512 count=10 seek=100 conv=notrunc
 
-	nasm -f elf64 usr/src/soil/execute.asm -o usr/src/soil/build/execute.s.o
-	${CC} ${C_FLAGS} ${U_INCLUDE} -c usr/src/soil/main.c -o usr/src/soil/build/main.o
-	ld -nostdlib -Tusr/src/soil/linker.ld -o usr/src/soil/build/soil usr/src/soil/build/main.o usr/src/soil/build/execute.s.o build/lib.a
-	objcopy -O binary usr/src/soil/build/soil usr/src/soil/build/soil.bin
-	dd if=usr/src/soil/build/soil.bin of=build/mars.img bs=512 count=10 seek=110 conv=notrunc
+	nasm -f elf64 usr/src/rover/execute.asm -o usr/src/rover/build/execute.s.o
+	${CC} ${C_FLAGS} ${U_INCLUDE} -c usr/src/rover/main.c -o usr/src/rover/build/main.o
+	ld -nostdlib -Tusr/src/rover/linker.ld -o usr/src/rover/build/rover usr/src/rover/build/main.o usr/src/rover/build/execute.s.o build/lib.a
+	objcopy -O binary usr/src/rover/build/rover usr/src/rover/build/rover.bin
+	dd if=usr/src/rover/build/rover.bin of=build/mars.img bs=512 count=10 seek=110 conv=notrunc
 
 ps_clean: clean
 	rm -rf usr/src/ps1/build/*
-	rm -rf usr/src/soil/build/*
+	rm -rf usr/src/rover/build/*
 
 image: bootloader kernel
 	dd if=build/boot.bin of=build/mars.img bs=512 count=1 conv=notrunc

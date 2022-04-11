@@ -36,13 +36,20 @@ void init_proc(void) {
       // TODO, LOG, not enough process to load all programs
     }
 
-    list_append(&ready_list, (struct node *)p);
+    ready_list = *list_append(&ready_list, p);
   }
 
   // execute first program
-  struct proc *ps = (struct proc *)list_remove_head(&ready_list);
+
+  if (list_is_empty(&ready_list)) {
+    return;
+  }
+
+  struct proc *ps = ready_list.head;
   ps->state = PROC_RUNNING;
   current_ps = ps;
+
+  ready_list = *list_remove_head(&ready_list);
 
   set_tss(ps);
   switch_vm(ps->pml4);
@@ -118,7 +125,7 @@ static struct proc *new_proc(paddr_t code) {
   return ps;
 }
 
-// yield is called in the kernel/int/int.c
+// proc_context_switch is called in the kernel/int/int.c
 // to context switching by the timer
 void proc_contex_switch(void) {
   if (list_is_empty(&ready_list)) {
@@ -127,7 +134,7 @@ void proc_contex_switch(void) {
 
   struct proc *ps = current_ps;
   ps->state = PROC_READY;
-  list_append(&ready_list, (struct Node *)ps);
+  ready_list = *list_append(&ready_list, ps);
 
   schedule();
 }
@@ -141,8 +148,10 @@ static void switch_process(struct proc *prev, struct proc *current) {
 static void schedule(void) {
   ASSERT(!list_is_empty(&ready_list));
 
-  struct proc *next_ps = (struct proc *)list_remove_head(&ready_list);
+  struct proc *next_ps = ready_list.head;
   next_ps->state = PROC_RUNNING;
+
+  ready_list = *list_remove_head(&ready_list);
 
   struct proc *prev_ps = current_ps;
   current_ps = next_ps;
@@ -153,19 +162,26 @@ void proc_sleep(int wait) {
   struct proc *ps = current_ps;
   ps->state = PROC_SLEEP;
   ps->wait = wait;
-  list_append(&wait_list, (struct Node *)ps);
+  wait_list = *list_append(&wait_list, ps);
 
   schedule();
 }
 
 void proc_wake_up(int wait) {
-  struct proc *ps = (struct proc *)list_remove(&wait_list, wait);
+  if (list_is_empty(&wait_list)) {
+    return;
+  }
+
+  struct proc *ps = list_find(&wait_list, wait);
+  wait_list = *list_remove(&wait_list, ps);
   // generally, we could have multiple processes waiting on the same object
   // find all the waiting processes in the list
   while (ps != NULL) {
     ps->state = PROC_READY;
-    list_append(&ready_list, (struct Node *)ps);
-    ps = (struct proc *)list_remove(&wait_list, wait);
+    ready_list = *list_append(&ready_list, ps);
+
+    ps = list_find(&wait_list, wait);
+    wait_list = *list_remove(&wait_list, ps);
   }
 }
 
@@ -173,7 +189,7 @@ void proc_exit(void) {
   struct proc *ps = current_ps;
   ps->state = PROC_KILLED;
 
-  list_append(&kill_list, (struct Node *)ps);
+  kill_list = *list_append(&kill_list, ps);
 
   proc_wake_up(1);
   schedule();
@@ -182,7 +198,7 @@ void proc_exit(void) {
 void proc_wait(void) {
   while (1) {
     if (!list_is_empty(&kill_list)) {
-      struct proc *ps = (struct proc *)list_remove_head(&kill_list);
+      struct proc *ps = kill_list.head;
       ASSERT(ps->state == PROC_KILLED);
 
       kfree(ps->kstack);

@@ -15,7 +15,8 @@ struct proc {
   uint64_t pml4;
   uint64_t kstack;
   struct trap_frame *tf;
-  struct node *next;
+
+  struct proc* next;
 };
 
 #define STACK_SIZE (2 * 1024 * 1024)

@@ -6,13 +6,16 @@ void main(void) {
   // *p = 1;
 
   int i = 0;
-  // while (1) {
+  // // while (1) {
   printf("%d ps1 executed\n", i);
-  //   syscall_sleep(100);
-  //   i++;
-  // }
+  // sys_sleep(100);
+  // //   i++;
+  // // }
 
-  // while (1) {
+  // // while (1) {
   // }
-  sys_wait();
+  // sys_wait();
+
+  while (1) {
+  }
 }

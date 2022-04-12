@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define PS2_PORT 0x60
+
 // NOTE:
 // The scan code is sent to the handler when we press a key
 // and realse a key, so we have two scenarios.

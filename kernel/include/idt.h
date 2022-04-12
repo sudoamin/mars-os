@@ -7,10 +7,14 @@
 #ifndef _IDT_H
 #define _IDT_H
 
+#include <stdint.h>
+
 #define KERNEL_CODE_SELECTOR 8
 #define TOTAL_INTERRUPTS 256
 
-#include <stdint.h>
+#define INT_TIMER 32
+#define INT_KEYBOARD 33
+#define INT_SYSCALL 0X80
 
 struct idt_entry {
   uint16_t offset_1;    // Offset bits 0 - 15

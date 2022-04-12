@@ -1,6 +1,6 @@
 CC = gcc
 C_FLAGS = -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone
-K_INCLUDE = -I. -Ikernel/include -Iinclude -Iusr/include
+K_INCLUDE = -I. -Ikernel/include -Iinclude -Iusr/include -Idrivers/include
 U_INCLUDE = -I. -Iinclude -Iusr/include
 OBJECTS = build/kernel.s.o build/kernel.o \
 	build/idt.s.o build/idt.o build/int.o \

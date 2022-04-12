@@ -19,12 +19,12 @@ void int_handler(struct trap_frame *tf) {
   // unsigned char isr_value;
 
   switch (tf->trapno) {
-    case 32:
+    case INT_TIMER:
       timer_handler();
       eoi();
       break;
 
-    case 33:
+    case INT_KEYBOARD:
       ps2_handler();
       eoi();
       break;
@@ -36,7 +36,7 @@ void int_handler(struct trap_frame *tf) {
       }
       break;
 
-    case 0x80:
+    case INT_SYSCALL:
       // tf to reference the data in the user stack
       syscall(tf);
       break;
@@ -53,7 +53,7 @@ void int_handler(struct trap_frame *tf) {
       }
   }
 
-  if (tf->trapno == 32) {
+  if (tf->trapno == INT_TIMER) {
     proc_contex_switch();
   }
 }

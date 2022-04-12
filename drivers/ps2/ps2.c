@@ -61,7 +61,7 @@ static char kbrd_read_handler(void) {
   unsigned char scan_code;
   char ch;
 
-  scan_code = inb(0x60);
+  scan_code = inb(PS2_PORT);
 
   // if the scan code is starts with E0,
   // we will add E0 sign to the flag and return 0

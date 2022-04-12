@@ -30,14 +30,14 @@ void init_idt() {
   idt_entry_set(&idt[16], (uint64_t)vector16, 0x8e);
   idt_entry_set(&idt[17], (uint64_t)vector17, 0x8e);
   idt_entry_set(&idt[19], (uint64_t)vector19, 0x8e);
-  idt_entry_set(&idt[32], (uint64_t)vector32, 0x8e);
-  idt_entry_set(&idt[33], (uint64_t)vector33, 0x8e);
+  idt_entry_set(&idt[INT_TIMER], (uint64_t)vector32, 0x8e);
+  idt_entry_set(&idt[INT_KEYBOARD], (uint64_t)vector33, 0x8e);
   idt_entry_set(&idt[39], (uint64_t)vector39, 0x8e);
 
   // 0xee, set dpl to 3 instead of 0
   // we will fire the interrupt in ring3 so the dpt should be 3,
   // otherwise we have no privilege to access this descriptor.
-  idt_entry_set(&idt[0x80], (uint64_t)sysint, 0xee);
+  idt_entry_set(&idt[INT_SYSCALL], (uint64_t)sysint, 0xee);
 
   idt_ptr->limit = sizeof(idt) - 1;
   idt_ptr->base = (uint64_t)idt;

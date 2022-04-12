@@ -35,8 +35,6 @@ global load_idt
 global pstart
 global swap
 
-global in_byte
-
 interrupt:
     push rax
     push rbx
@@ -249,11 +247,4 @@ swap:
     pop rbp
     pop rbx
     
-    ret
-
-in_byte:
-    ; port number
-    mov rdx, rdi
-    ; read data
-    in al, dx
     ret

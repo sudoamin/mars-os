@@ -1,5 +1,6 @@
 #include <drivers/include/ps2.h>
 #include <kernel/include/console.h>
+#include <kernel/include/io.h>
 #include <kernel/include/proc.h>
 
 static unsigned char shift_code[256] = {
@@ -60,7 +61,7 @@ static char kbrd_read_handler(void) {
   unsigned char scan_code;
   char ch;
 
-  scan_code = in_byte(0x60);
+  scan_code = inb(0x60);
 
   // if the scan code is starts with E0,
   // we will add E0 sign to the flag and return 0

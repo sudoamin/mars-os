@@ -26,6 +26,5 @@ struct kbrd_buf {
 
 char read_key_buf(void);
 void ps2_handler(void);
-unsigned char in_byte(uint16_t port);
 
 #endif

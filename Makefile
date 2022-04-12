@@ -5,7 +5,7 @@ U_INCLUDE = -I. -Iinclude -Iusr/include
 OBJECTS = build/kernel.s.o build/kernel.o \
 	build/idt.s.o build/idt.o build/int.o \
 	build/mem.o build/mem.s.o build/proc.o build/syscall.o \
-	build/kconsole.o build/ps2.o
+	build/kconsole.o build/ps2.o build/io.s.o
 
 all: image
 .PHONY: bootloader kernel
@@ -25,6 +25,7 @@ kernel: lib.a
 
 	nasm -f elf64 kernel/kernel.asm -o build/kernel.s.o
 	nasm -f elf64 kernel/mem/mem.asm -o build/mem.s.o
+	nasm -f elf64 kernel/io/io.asm -o build/io.s.o
 	${CC} ${C_FLAGS} ${K_INCLUDE} -c kernel/kernel.c -o build/kernel.o
 	${CC} ${C_FLAGS} ${K_INCLUDE} -c kernel/mem/mem.c -o build/mem.o
 	${CC} ${C_FLAGS} ${K_INCLUDE} -c kernel/proc/proc.c -o build/proc.o

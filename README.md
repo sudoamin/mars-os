@@ -11,7 +11,7 @@ make ps && make run && make ps_clean
 # TODO
 current task: 15
 
-1. Should I make a programming language and rewrite this OS ?
+1. Removed
 2. Removed
 3. Update Makefile   
 4. Write Documents
@@ -40,6 +40,3 @@ current task: 15
 14. Logger and panic    
 15. Write a shell (named Rover)    
 16. Linker & Loader
-
-# Notes
-1. Do not use the C typedef for structs

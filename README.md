@@ -23,6 +23,7 @@ make ps && make run && make ps_clean
     - Fork/Exec
     - Syscalls ✓
     - Ring0 processes
+    - Threads
 7. Filesystem
     - FAT16
     - FD

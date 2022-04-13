@@ -9,7 +9,6 @@ make ps && make run && make ps_clean
 ```
 
 # TODO
-current task: 15
 
 1. Removed
 2. Removed
@@ -38,5 +37,5 @@ current task: 15
 12. Complete console ✓
 13. Refactoring kernel/proc ✓    
 14. Logger and panic    
-15. Write a shell (named Rover)    
+15. Write a shell (named Rover) WIP    
 16. Linker & Loader

@@ -16,6 +16,7 @@ make ps && make run && make ps_clean
 4. Write Documents
 5. Memory managment
     - Heap(malloc, free)
+    - Paging ✓
 6. Process managment
     - Scheduler ✓
     - Wait/Exit ✓
